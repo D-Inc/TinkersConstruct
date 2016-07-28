@@ -172,8 +172,8 @@ tile.tconstruct.seared_glass.glass.tooltip=Part of the Smeltery. Safe for decora
 tile.tconstruct.stone_torch.name=Stone Torch
 tile.tconstruct.stone_ladder.name=Stone Ladder
 tile.tconstruct.wood_rail.name=Wooden Rail
-tile.tconstruct.wood_rail_dropper.name=Wooden Rail with a Trapdoor
-tile.tconstruct.wood_rail_dropper.tooltip=Minecarts with a Hopper can\ninsert into the block below
+tile.tconstruct.wood_rail_trapdoor.name=Wooden Rail with a Trapdoor
+tile.tconstruct.wood_rail_trapdoor.tooltip=Minecarts with a Hopper can\ninsert into the block below
 tile.tconstruct.punji.name=Punji Sticks
 tile.tconstruct.punji.tooltip=Pointy! Also sticks to walls.
 tile.tconstruct.glow.name=Glow
@@ -517,7 +517,7 @@ stat.projectile.ammo.name=Ammo
 
 # traits are also modifiers, they use the same prefix so they don't have to be localized twice
 modifier.alien.name=Alien
-modifier.alien.desc=§oSomething is off...§r\n..but I can't tell what! Maybe time will tell.
+modifier.alien.desc=§oThe stats feel off...§r\n..as if they're changing! Maybe time will tell?
 modifier.aquadynamic.name=Aquadynamic
 modifier.aquadynamic.desc=§oIt's getting wet in here!§r\nThe tool is unhindered by water and loves rainy evenings.
 modifier.aridiculous.name=Aridiculous
@@ -651,13 +651,17 @@ modifier.necrotic.desc=§oI feel so Alive!!§r\nHitting enemies returns health t
 modifier.necrotic.extra=Lifesteal: +%s
 modifier.reinforced.name=Reinforced
 modifier.reinforced.unbreakable=Unbreakable
-modifier.reinforced.desc=§oSo strong!§r\nEach level adds a 15% chance to not use durability.
+modifier.reinforced.desc=§oSo strong!§r\nEach level adds a %s chance to not use durability.
+modifier.reinforced.extra=Reinforced: %s
 modifier.sharpness.name=Sharp
 modifier.sharpness.name2=Sharper
 modifier.sharpness.name3=Sharpest
 modifier.sharpness.name4=Sharpester
 modifier.sharpness.name5=Sharpestest
 modifier.sharpness.desc=§oOuch!§r\nSo sharp, it hurts to look at it.
+modifier.shulking.name=Shulking
+modifier.shulking.desc=§oUp up and away!§r\nHitting foes causes them to float away.
+modifier.shulking.extra=Float Duration: %ss
 modifier.silktouch.name=Silktouch
 modifier.silktouch.desc=§oSmooth as silk!§r\nMined blocks drop themselves instead of the usual items.
 modifier.smite.name=Smite
@@ -665,6 +669,8 @@ modifier.smite.desc=§oFor Justice!§r\nDeal massive damage to undead.
 modifier.smite.extra=Vs Undead: +%s
 modifier.soulbound.name=Soulbound
 modifier.soulbound.desc=§oA merry couple!§r\nYou love your tool. Not even death can part you.
+modifier.webbed.name=Webbed
+modifier.webbed.desc=§oYuck!§r\nEntangle your foes in cobwebs, slowing them.
 
 #################
 #   Tool Info   #
@@ -740,6 +746,7 @@ gui.error.single_modifier=%s can only be applied once.
 gui.error.max_level_modifier=Maximum Level for %s already reached.
 gui.error.no_modifier_for_item=No modifier found for %s.
 gui.error.incompatible_modifiers=Modifiers %s and %s cannot be applied together
+gui.error.incompatible_trait=Modifier %s can not be used together with trait %s
 gui.error.incompatible_enchantments=Modifier %s cannot be combined with enchantment %s
 
 ################

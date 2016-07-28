@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.tools;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 
@@ -9,6 +8,7 @@ import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -84,7 +84,9 @@ import slimeknights.tconstruct.tools.modifiers.ModMendingMoss;
 import slimeknights.tconstruct.tools.modifiers.ModNecrotic;
 import slimeknights.tconstruct.tools.modifiers.ModReinforced;
 import slimeknights.tconstruct.tools.modifiers.ModSharpness;
+import slimeknights.tconstruct.tools.modifiers.ModShulking;
 import slimeknights.tconstruct.tools.modifiers.ModSilktouch;
+import slimeknights.tconstruct.tools.modifiers.ModWebbed;
 import slimeknights.tconstruct.tools.modifiers.ModSoulbound;
 import slimeknights.tconstruct.tools.tileentity.TileCraftingStation;
 import slimeknights.tconstruct.tools.tileentity.TilePartBuilder;
@@ -176,7 +178,9 @@ public class TinkerTools extends TinkerPulse {
   public static Modifier modNecrotic;
   public static Modifier modReinforced;
   public static Modifier modSharpness;
+  public static Modifier modShulking;
   public static Modifier modSilktouch;
+  public static Modifier modWebbed;
   public static Modifier modSmite;
   public static Modifier modSoulbound;
 
@@ -339,8 +343,14 @@ public class TinkerTools extends TinkerPulse {
     modSharpness.addItem("gemQuartz");
     modSharpness.addItem("blockQuartz", 1, 4);
 
+    modShulking = registerModifier(new ModShulking());
+    modShulking.addItem(Items.CHORUS_FRUIT_POPPED);
+
     modSilktouch = registerModifier(new ModSilktouch());
     modSilktouch.addItem(TinkerCommons.matSilkyJewel, 1, 1);
+
+    modWebbed = registerModifier(new ModWebbed());
+    modWebbed.addItem(Blocks.WEB, 1);
 
     modSmite = new ModAntiMonsterType("smite", 0xe8d500, 5, 24, EnumCreatureAttribute.UNDEAD);
     modSmite = registerModifier(modSmite);
@@ -542,6 +552,9 @@ public class TinkerTools extends TinkerPulse {
                                                  'B', "plankWood",
                                                  'W', Items.LAVA_BUCKET));
     }
+
+
+    CraftingManager.getInstance().addRecipe(new RepairRecipe());
   }
 
   public static void registerToolForgeBlock(String oredict) {

@@ -15,8 +15,13 @@ import net.minecraftforge.event.world.BlockEvent;
 import java.util.ListIterator;
 
 import slimeknights.tconstruct.common.config.Config;
+import slimeknights.tconstruct.library.modifiers.IModifier;
+import slimeknights.tconstruct.library.modifiers.IToolMod;
 import slimeknights.tconstruct.library.traits.AbstractTrait;
+import slimeknights.tconstruct.library.traits.ITrait;
 import slimeknights.tconstruct.library.utils.ToolHelper;
+import slimeknights.tconstruct.tools.TinkerMaterials;
+import slimeknights.tconstruct.tools.TinkerTools;
 
 public class TraitAutosmelt extends AbstractTrait {
 
@@ -27,6 +32,12 @@ public class TraitAutosmelt extends AbstractTrait {
   @Override
   public boolean canApplyTogether(Enchantment enchantment) {
     return enchantment != Enchantments.SILK_TOUCH;
+  }
+
+  @Override
+  public boolean canApplyTogether(IToolMod toolmod) {
+    return !toolmod.getIdentifier().equals(TinkerMaterials.squeaky.getIdentifier())
+        && !toolmod.getIdentifier().equals(TinkerTools.modSilktouch.getIdentifier());
   }
 
   @Override

@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import slimeknights.mantle.client.CreativeTab;
 import slimeknights.mantle.util.RecipeMatch;
 import slimeknights.tconstruct.library.events.MaterialEvent;
@@ -50,6 +52,7 @@ import slimeknights.tconstruct.library.tools.Shard;
 import slimeknights.tconstruct.library.tools.ToolCore;
 import slimeknights.tconstruct.library.traits.ITrait;
 
+@SuppressWarnings("unused")
 public final class TinkerRegistry {
 
   // the logger for the library
@@ -143,7 +146,7 @@ public final class TinkerRegistry {
   }
 
   public static Collection<Material> getAllMaterials() {
-    return materials.values();
+    return ImmutableList.copyOf(materials.values());
   }
 
   public static Collection<Material> getAllMaterialsWithStats(String statType) {
@@ -446,7 +449,7 @@ public final class TinkerRegistry {
   }
 
   public static Collection<IModifier> getAllModifiers() {
-    return modifiers.values();
+    return ImmutableList.copyOf(modifiers.values());
   }
 
   /*---------------------------------------------------------------------------
@@ -495,7 +498,7 @@ public final class TinkerRegistry {
   }
 
   public static List<MeltingRecipe> getAllMeltingRecipies() {
-    return meltingRegistry;
+    return ImmutableList.copyOf(meltingRegistry);
   }
 
   public static void registerAlloy(FluidStack result, FluidStack... inputs) {
@@ -514,7 +517,7 @@ public final class TinkerRegistry {
   }
 
   /** Registers a casting recipe for casting table */
-  public static void registerTableCasting(ItemStack output, ItemStack cast, Fluid fluid, int amount) {
+  public static void registerTableCasting(ItemStack output, @Nullable ItemStack cast, Fluid fluid, int amount) {
     RecipeMatch rm = null;
     if(cast != null) {
       rm = RecipeMatch.ofNBT(cast);
@@ -526,7 +529,7 @@ public final class TinkerRegistry {
     tableCastRegistry.add(recipe);
   }
 
-  public static ICastingRecipe getTableCasting(ItemStack cast, Fluid fluid) {
+  public static ICastingRecipe getTableCasting(@Nullable ItemStack cast, Fluid fluid) {
     for(ICastingRecipe recipe : tableCastRegistry) {
       if(recipe.matches(cast, fluid)) {
         return recipe;
@@ -536,12 +539,12 @@ public final class TinkerRegistry {
   }
 
   public static List<ICastingRecipe> getAllTableCastingRecipes() {
-    return tableCastRegistry;
+    return ImmutableList.copyOf(tableCastRegistry);
   }
 
 
   /** Registers a casting recipe for the casting basin */
-  public static void registerBasinCasting(ItemStack output, ItemStack cast, Fluid fluid, int amount) {
+  public static void registerBasinCasting(ItemStack output, @Nullable ItemStack cast, Fluid fluid, int amount) {
     RecipeMatch rm = null;
     if(cast != null) {
       rm = RecipeMatch.ofNBT(cast);
@@ -553,7 +556,7 @@ public final class TinkerRegistry {
     basinCastRegistry.add(recipe);
   }
 
-  public static ICastingRecipe getBasinCasting(ItemStack cast, Fluid fluid) {
+  public static ICastingRecipe getBasinCasting(@Nullable ItemStack cast, Fluid fluid) {
     for(ICastingRecipe recipe : basinCastRegistry) {
       if(recipe.matches(cast, fluid)) {
         return recipe;
@@ -563,7 +566,7 @@ public final class TinkerRegistry {
   }
 
   public static List<ICastingRecipe> getAllBasinCastingRecipes() {
-    return basinCastRegistry;
+    return ImmutableList.copyOf(basinCastRegistry);
   }
 
   /**
@@ -611,7 +614,7 @@ public final class TinkerRegistry {
 
   /** Returns all registered smeltery fuels */
   public static Collection<FluidStack> getSmelteryFuels() {
-    return smelteryFuels.keySet();
+    return ImmutableSet.copyOf(smelteryFuels.keySet());
   }
 
   /** Register an entity to melt into the given fluidstack. The fluidstack is returned for 1 heart damage */
@@ -640,7 +643,7 @@ public final class TinkerRegistry {
    * @return The list of all drying rack recipes
    */
   public static List<DryingRecipe> getAllDryingRecipes() {
-    return dryingRegistry;
+    return ImmutableList.copyOf(dryingRegistry);
   }
   
   /**
@@ -703,7 +706,7 @@ public final class TinkerRegistry {
 
   /**
    * Adds a new drying recipe
-   * @param input Input ore dictionary entry
+   * @param oredict Input ore dictionary entry
    * @param output Output ItemStack
    * @param time Recipe time in ticks
    */ 

@@ -28,11 +28,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import slimeknights.mantle.util.RecipeMatch;
 import slimeknights.tconstruct.common.ClientProxy;
 import slimeknights.tconstruct.library.TinkerRegistry;
 import slimeknights.tconstruct.library.Util;
@@ -54,7 +54,6 @@ import slimeknights.tconstruct.library.utils.TooltipBuilder;
 import slimeknights.tconstruct.tools.TinkerMaterials;
 import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.tools.traits.InfiTool;
-import slimeknights.tconstruct.tools.traits.ToolGrowth;
 
 /**
  * Intermediate abstraction layer for all tools/melee weapons. This class has all the callbacks for blocks and enemies
@@ -439,6 +438,27 @@ public abstract class ToolCore extends TinkersItem {
     return Util.translate(getUnlocalizedName() + ".desc");
   }
 
+  @Override
+  protected int repairCustom(Material material, ItemStack[] repairItems) {
+    RecipeMatch.Match match = RecipeMatch.of(TinkerTools.sharpeningKit).matches(repairItems);
+    if(match == null) {
+      return 0;
+    }
+
+    for(ItemStack stacks : match.stacks) {
+      // invalid material?
+      if(TinkerTools.sharpeningKit.getMaterial(stacks) != material) {
+        return 0;
+      }
+    }
+
+    RecipeMatch.removeMatch(repairItems, match);
+    HeadMaterialStats stats = material.getStats(HeadMaterialStats.TYPE);
+    float durability = stats.durability * match.amount * TinkerTools.sharpeningKit.getCost();
+    durability /= Material.VALUE_Ingot;
+    return (int)(durability);
+  }
+
   /* Additional Trait callbacks */
 
   @Override
@@ -491,6 +511,11 @@ public abstract class ToolCore extends TinkersItem {
     TinkerTools.proxy.preventPlayerSlowdown(entityIn, originalSpeed, this);
   }
 
+  @Override
+  public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
+    return shouldCauseReequipAnimation(oldStack, newStack, false);
+  }
+
   @SideOnly(Side.CLIENT)
   @Override
   public boolean shouldCauseReequipAnimation(ItemStack oldStack, @Nonnull ItemStack newStack, boolean slotChanged) {
@@ -505,13 +530,22 @@ public abstract class ToolCore extends TinkersItem {
       return true;
     }
 
-    Multimap<String, AttributeModifier> attributes = newStack.getAttributeModifiers(EntityEquipmentSlot.MAINHAND);
-    for(Map.Entry<String, AttributeModifier> entry : oldStack.getAttributeModifiers(EntityEquipmentSlot.MAINHAND).entries()) {
-      if(!attributes.containsKey(entry.getKey())) {
+    Multimap<String, AttributeModifier> attributesNew = newStack.getAttributeModifiers(EntityEquipmentSlot.MAINHAND);
+    Multimap<String, AttributeModifier> attributesOld = oldStack.getAttributeModifiers(EntityEquipmentSlot.MAINHAND);
+
+    if(attributesNew.size() != attributesOld.size()) {
+      return true;
+    }
+    for(String key : attributesOld.keySet()) {
+      if(!attributesNew.containsKey(key)) {
         return true;
       }
-      if(!attributes.get(entry.getKey()).equals(entry.getValue())) {
-        return true;
+      Iterator<AttributeModifier> iter1 = attributesNew.get(key).iterator();
+      Iterator<AttributeModifier> iter2 = attributesOld.get(key).iterator();
+      while(iter1.hasNext() && iter2.hasNext()) {
+        if(!iter1.next().equals(iter2.next())) {
+          return true;
+        }
       }
     }
 
