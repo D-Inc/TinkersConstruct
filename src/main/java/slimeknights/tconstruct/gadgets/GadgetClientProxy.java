@@ -25,11 +25,12 @@ import slimeknights.tconstruct.gadgets.entity.EntityThrowball;
 import slimeknights.tconstruct.gadgets.item.ItemThrowball;
 import slimeknights.tconstruct.library.Util;
 import slimeknights.tconstruct.library.client.model.PropertyStateMapper;
+import slimeknights.tconstruct.library.client.model.ToolModelLoader;
 import slimeknights.tconstruct.shared.block.BlockSlime;
 
 public class GadgetClientProxy extends ClientProxy {
 
-  
+
   @Override
   public void init() {
     Minecraft minecraft = Minecraft.getMinecraft();
@@ -55,7 +56,7 @@ public class GadgetClientProxy extends ClientProxy {
 
     super.init();
   }
-  
+
   @Override
   protected void registerModels() {
     super.registerModels();
@@ -73,7 +74,7 @@ public class GadgetClientProxy extends ClientProxy {
     registerItemModel(TinkerGadgets.woodRailTrapdoor);
 
     registerItemModel(TinkerGadgets.slimeChannel); //tinted for variants
-    
+
     registerItemBlockMeta(TinkerGadgets.driedClay);
     registerItemBlockMeta(TinkerGadgets.brownstone);
 
@@ -112,11 +113,23 @@ public class GadgetClientProxy extends ClientProxy {
     RenderingRegistry.registerEntityRenderingHandler(EntityFancyItemFrame.class, RenderFancyItemFrame.FACTORY);
 
     for(EntityFancyItemFrame.FrameType type : EntityFancyItemFrame.FrameType.values()) {
-      ModelResourceLocation loc = Util.getModelResource("fancy_frame", type.toString());
-      ModelLoader.registerItemVariants(TinkerGadgets.fancyFrame, loc);
-      ModelLoader.setCustomModelResourceLocation(TinkerGadgets.fancyFrame, type.ordinal(), loc);
+      for(boolean withMap : new boolean[]{true, false}) {
+        String variant = RenderFancyItemFrame.getVariant(type, withMap);
+        ModelResourceLocation loc = Util.getModelResource("fancy_frame", variant);
+        ModelLoader.registerItemVariants(TinkerGadgets.fancyFrame, loc);
+        if(!withMap) {
+          ModelLoader.setCustomModelResourceLocation(TinkerGadgets.fancyFrame, type.ordinal(), loc);
+        }
+      }
     }
     RenderingRegistry.registerEntityRenderingHandler(EntityThrowball.class, RenderThrowball.FACTORY);
+
+
+    // Mom's Spaghetti
+    TinkerGadgets.spaghetti.registerItemModels();
+    registerToolModel(TinkerGadgets.momsSpaghetti, Util.getResource("moms_spaghetti" + ToolModelLoader.EXTENSION));
+    registerModifierModel(TinkerGadgets.modSpaghettiSauce, Util.getModifierResource(TinkerGadgets.modSpaghettiSauce.getIdentifier()));
+    registerModifierModel(TinkerGadgets.modSpaghettiMeat, Util.getModifierResource(TinkerGadgets.modSpaghettiMeat.getIdentifier()));
   }
 
   @Override

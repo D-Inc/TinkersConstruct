@@ -1,10 +1,12 @@
 [
   {
-    "type": "blank"
+    "name": "intro",
+    "type": "image with text below",
+    "data": "smeltery/intro.json"
   },
   {
-    "name": "intro",
+    "name": "structure",
     "type": "text",
-    "data": "smeltery/intro.json"
+    "data": "smeltery/structure.json"
   }
 ]

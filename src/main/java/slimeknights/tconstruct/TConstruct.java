@@ -38,8 +38,13 @@ import slimeknights.tconstruct.plugin.waila.Waila;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.TinkerFluids;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.tools.AggregateModelRegistrar;
 import slimeknights.tconstruct.tools.TinkerMaterials;
+import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.tools.harvest.TinkerHarvestTools;
+import slimeknights.tconstruct.tools.melee.TinkerMeleeWeapons;
+import slimeknights.tconstruct.tools.ranged.TinkerRangedWeapons;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 /**
@@ -53,8 +58,8 @@ import slimeknights.tconstruct.world.TinkerWorld;
     name = TConstruct.modName,
     version = TConstruct.modVersion,
     guiFactory = "slimeknights.tconstruct.common.config.ConfigGui$ConfigGuiFactory",
-    dependencies = "required-after:Forge@[12.18.1.2024,);"
-                   + "required-after:mantle@[1.10.2-0.10.4,)",
+    dependencies = "required-after:Forge@[12.18.1.2073,);"
+                   + "required-after:mantle@[1.10.2-1.0.0,)",
     acceptedMinecraftVersions = "[1.10.2, 1.11)")
 public class TConstruct {
 
@@ -65,7 +70,6 @@ public class TConstruct {
   public static final Logger log = LogManager.getLogger(modID);
   public static final Random random = new Random();
 
-  /* Instance of this mod, used for grabbing prototype fields */
   @Mod.Instance(modID)
   public static TConstruct instance;
 
@@ -79,13 +83,22 @@ public class TConstruct {
   static {
     pulseManager.registerPulse(new TinkerCommons());
     pulseManager.registerPulse(new TinkerWorld());
+
     pulseManager.registerPulse(new TinkerTools());
+    pulseManager.registerPulse(new TinkerHarvestTools());
+    pulseManager.registerPulse(new TinkerMeleeWeapons());
+    pulseManager.registerPulse(new TinkerRangedWeapons());
+    pulseManager.registerPulse(new TinkerModifiers());
+
     pulseManager.registerPulse(new TinkerSmeltery());
     pulseManager.registerPulse(new TinkerGadgets());
+
     pulseManager.registerPulse(new TinkerOredict()); // oredict the items added in the pulses before, needed for integration
     pulseManager.registerPulse(new TinkerIntegration()); // takes care of adding all the fluids, materials, melting etc. together
     pulseManager.registerPulse(new TinkerFluids());
     pulseManager.registerPulse(new TinkerMaterials());
+
+    pulseManager.registerPulse(new AggregateModelRegistrar());
     // Plugins/Integration
     //pulseManager.registerPulse(new TinkerVintageCraft());
     pulseManager.registerPulse(new ChiselAndBits());
@@ -157,7 +170,7 @@ public class TConstruct {
       // old universal bucket, got moved into Forge
       // glow is the leftover itemblock form which was removed
       if(mapping.type == GameRegistry.Type.ITEM
-          && (mapping.name.equals(Util.resource("bucket")) || mapping.name.equals(Util.resource("glow")))) {
+         && (mapping.name.equals(Util.resource("bucket")) || mapping.name.equals(Util.resource("glow")))) {
         mapping.ignore();
       }
     }

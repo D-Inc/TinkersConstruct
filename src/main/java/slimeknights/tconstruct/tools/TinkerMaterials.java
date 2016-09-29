@@ -3,11 +3,7 @@ package slimeknights.tconstruct.tools;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 
-import com.sun.org.apache.bcel.internal.generic.IREM;
-
-import net.minecraft.block.BlockPrismarine;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
@@ -30,61 +26,29 @@ import slimeknights.tconstruct.library.client.MaterialRenderInfo;
 import slimeknights.tconstruct.library.client.texture.ExtraUtilityTexture;
 import slimeknights.tconstruct.library.client.texture.MetalColoredTexture;
 import slimeknights.tconstruct.library.client.texture.MetalTextureTexture;
+import slimeknights.tconstruct.library.materials.ArrowShaftMaterialStats;
+import slimeknights.tconstruct.library.materials.BowMaterialStats;
+import slimeknights.tconstruct.library.materials.BowStringMaterialStats;
 import slimeknights.tconstruct.library.materials.ExtraMaterialStats;
+import slimeknights.tconstruct.library.materials.FletchingMaterialStats;
 import slimeknights.tconstruct.library.materials.HandleMaterialStats;
 import slimeknights.tconstruct.library.materials.HeadMaterialStats;
 import slimeknights.tconstruct.library.materials.Material;
 import slimeknights.tconstruct.library.traits.AbstractTrait;
+import slimeknights.tconstruct.library.traits.ITrait;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.TinkerFluids;
-import slimeknights.tconstruct.tools.traits.TraitAlien;
-import slimeknights.tconstruct.tools.traits.TraitAquadynamic;
-import slimeknights.tconstruct.tools.traits.TraitAridiculous;
-import slimeknights.tconstruct.tools.traits.TraitAutosmelt;
-import slimeknights.tconstruct.tools.traits.TraitBaconlicious;
-import slimeknights.tconstruct.tools.traits.TraitBonusDamage;
-import slimeknights.tconstruct.tools.traits.TraitCheap;
-import slimeknights.tconstruct.tools.traits.TraitCheapskate;
-import slimeknights.tconstruct.tools.traits.TraitColdblooded;
-import slimeknights.tconstruct.tools.traits.TraitCrude;
-import slimeknights.tconstruct.tools.traits.TraitCrumbling;
-import slimeknights.tconstruct.tools.traits.TraitDense;
-import slimeknights.tconstruct.tools.traits.TraitDepthdigger;
-import slimeknights.tconstruct.tools.traits.TraitDuritos;
-import slimeknights.tconstruct.tools.traits.TraitEcological;
-import slimeknights.tconstruct.tools.traits.TraitEnderference;
-import slimeknights.tconstruct.tools.traits.TraitEstablished;
-import slimeknights.tconstruct.tools.traits.TraitFlammable;
-import slimeknights.tconstruct.tools.traits.TraitHellish;
-import slimeknights.tconstruct.tools.traits.TraitHoly;
-import slimeknights.tconstruct.tools.traits.TraitInsatiable;
-import slimeknights.tconstruct.tools.traits.TraitJagged;
-import slimeknights.tconstruct.tools.traits.TraitLightweight;
-import slimeknights.tconstruct.tools.traits.TraitMagnetic;
-import slimeknights.tconstruct.tools.traits.TraitMomentum;
-import slimeknights.tconstruct.tools.traits.TraitPetramor;
-import slimeknights.tconstruct.tools.traits.TraitPoisonous;
-import slimeknights.tconstruct.tools.traits.TraitPrickly;
-import slimeknights.tconstruct.tools.traits.TraitSharp;
-import slimeknights.tconstruct.tools.traits.TraitShocking;
-import slimeknights.tconstruct.tools.traits.TraitSlimey;
-import slimeknights.tconstruct.tools.traits.TraitSpiky;
-import slimeknights.tconstruct.tools.traits.TraitSplintering;
-import slimeknights.tconstruct.tools.traits.TraitSplinters;
-import slimeknights.tconstruct.tools.traits.TraitSqueaky;
-import slimeknights.tconstruct.tools.traits.TraitStiff;
-import slimeknights.tconstruct.tools.traits.TraitStonebound;
-import slimeknights.tconstruct.tools.traits.TraitSuperheat;
-import slimeknights.tconstruct.tools.traits.TraitTasty;
-import slimeknights.tconstruct.tools.traits.TraitUnnatural;
-import slimeknights.tconstruct.tools.traits.TraitWritable;
-import slimeknights.tconstruct.world.entity.EntityBlueSlime;
+import slimeknights.tconstruct.world.TinkerWorld;
+import slimeknights.tconstruct.world.block.BlockSlimeGrass;
 
+import static slimeknights.tconstruct.library.materials.MaterialTypes.HEAD;
+import static slimeknights.tconstruct.library.materials.MaterialTypes.SHAFT;
 import static slimeknights.tconstruct.library.utils.HarvestLevels.COBALT;
 import static slimeknights.tconstruct.library.utils.HarvestLevels.DIAMOND;
 import static slimeknights.tconstruct.library.utils.HarvestLevels.IRON;
 import static slimeknights.tconstruct.library.utils.HarvestLevels.OBSIDIAN;
 import static slimeknights.tconstruct.library.utils.HarvestLevels.STONE;
+import static slimeknights.tconstruct.tools.TinkerTraits.*;
 
 /**
  * All the tool materials tcon supports.
@@ -96,8 +60,7 @@ public final class TinkerMaterials {
   static final Logger log = Util.getLogger(PulseId);
 
   public static final List<Material> materials = Lists.newArrayList();
-
-  // not all listed materials are available by default. They enable when the needed material is present
+  // not all listed materials are available by default. They enable when the needed material is present. See TinkerIntegration
 
   // natural resources/blocks
   public static final Material wood       = mat("wood", 0x8e661b);
@@ -139,51 +102,25 @@ public final class TinkerMaterials {
   // specul
   public static final Material xu;
 
-  public static final AbstractTrait alien = new TraitAlien();
-  public static final AbstractTrait aquadynamic = new TraitAquadynamic();
-  public static final AbstractTrait aridiculous = new TraitAridiculous();
-  public static final AbstractTrait autosmelt = new TraitAutosmelt();
-  public static final AbstractTrait baconlicious = new TraitBaconlicious();
-  public static final AbstractTrait cheap = new TraitCheap();
-  public static final AbstractTrait cheapskate = new TraitCheapskate();
-  public static final AbstractTrait coldblooded = new TraitColdblooded();
-  public static final AbstractTrait crude = new TraitCrude(1);
-  public static final AbstractTrait crude2 = new TraitCrude(2);
-  public static final AbstractTrait crumbling = new TraitCrumbling();
-  public static final AbstractTrait dense = new TraitDense();
-  public static final AbstractTrait depthdigger = new TraitDepthdigger();
-  public static final AbstractTrait duritos = new TraitDuritos(); // yes you read that correctly
-  public static final AbstractTrait ecological = new TraitEcological();
-  public static final AbstractTrait enderference = new TraitEnderference();
-  public static final AbstractTrait established = new TraitEstablished();
-  public static final AbstractTrait flammable = new TraitFlammable();
-  public static final AbstractTrait fractured = new TraitBonusDamage("fractured", 1.5f);
-  public static final AbstractTrait hellish = new TraitHellish();
-  public static final AbstractTrait holy = new TraitHoly();
-  public static final AbstractTrait insatiable = new TraitInsatiable();
-  public static final AbstractTrait jagged = new TraitJagged();
-  public static final AbstractTrait lightweight = new TraitLightweight();
-  public static final AbstractTrait magnetic = new TraitMagnetic(1);
-  public static final AbstractTrait magnetic2 = new TraitMagnetic(2);
-  public static final AbstractTrait momentum = new TraitMomentum();
-  public static final AbstractTrait petramor = new TraitPetramor();
-  public static final AbstractTrait poisonous = new TraitPoisonous();
-  public static final AbstractTrait prickly = new TraitPrickly();
-  public static final AbstractTrait sharp = new TraitSharp();
-  public static final AbstractTrait shocking = new TraitShocking();
-  public static final AbstractTrait slimeyGreen = new TraitSlimey("green", EntitySlime.class);
-  public static final AbstractTrait slimeyBlue = new TraitSlimey("blue", EntityBlueSlime.class);
-  public static final AbstractTrait spiky = new TraitSpiky();
-  public static final AbstractTrait splintering = new TraitSplintering();
-  public static final AbstractTrait splinters = new TraitSplinters();
-  public static final AbstractTrait squeaky = new TraitSqueaky();
-  public static final AbstractTrait superheat = new TraitSuperheat();
-  public static final AbstractTrait stiff = new TraitStiff();
-  public static final AbstractTrait stonebound = new TraitStonebound();
-  public static final AbstractTrait tasty = new TraitTasty();
-  public static final AbstractTrait unnatural = new TraitUnnatural();
-  public static final AbstractTrait writable = new TraitWritable(1);
-  public static final AbstractTrait writable2 = new TraitWritable(2);
+  // bowstring materials
+  public static final Material string    = mat("string", 0xeeeeee);
+  public static final Material vine      = mat("vine", 0x40a10f);
+  public static final Material slimevine_blue   = mat("slimevine_blue", 0x74c8c7);
+  //public static final Material slimevine_orange = mat("slimevine_orange", 0xff960d);
+  public static final Material slimevine_purple = mat("slimevine_purple", 0xc873c8);
+
+  // additional arrow shaft
+  public static final Material blaze     = mat("blaze", 0xffc100);
+  public static final Material reed      = mat("reed", 0xaadb74);
+  public static final Material ice       = mat("ice", 0x97d7e0);
+  public static final Material endrod    = mat("endrod", 0xe8ffd6);
+
+  // fletching
+  public static final Material feather   = mat("feather", 0xeeeeee);
+  public static final Material leaf      = mat("leaf", 0x1d730c);
+  public static final Material slimeleaf_blue   = mat("slimeleaf_blue", 0x74c8c7);
+  public static final Material slimeleaf_orange = mat("slimeleaf_orange", 0xff960d);
+  public static final Material slimeleaf_purple = mat("slimeleaf_purple", 0xc873c8);
 
   private static Material mat(String name, int color) {
     Material mat = new Material(name, color);
@@ -194,8 +131,6 @@ public final class TinkerMaterials {
   static {
     xu = new Material("unstable", TextFormatting.WHITE);
   }
-
-  private static final String HEAD = HeadMaterialStats.TYPE;
 
   @Subscribe
   public void registerRendering(FMLPostInitializationEvent event) {
@@ -274,6 +209,23 @@ public final class TinkerMaterials {
         return new ExtraUtilityTexture(baseTexture, location);
       }
     });
+
+    string.setRenderInfo(0xeeeeee);
+    vine.setRenderInfo(0x40a10f);
+    slimevine_blue.setRenderInfo(0x74c8c7);
+    //slimevine_orange.setRenderInfo(0xff960d);
+    slimevine_purple.setRenderInfo(0xc873c8);
+
+    blaze.setRenderInfo(0xffd120);
+    reed.setRenderInfo(0xaadb74);
+    ice.setRenderInfo(0x97d7e0);
+    endrod.setRenderInfo(0xe8ffd6);
+
+    feather.setRenderInfo(0xffffff).setTextureSuffix("feather");
+    leaf.setRenderInfo(0x1d730c).setTextureSuffix("feather");
+    slimeleaf_blue.setRenderInfo(0x74c8c7);
+    slimeleaf_orange.setRenderInfo(0xff960d);
+    slimeleaf_purple.setRenderInfo(0xc873c8);
   }
 
   @Subscribe
@@ -283,7 +235,6 @@ public final class TinkerMaterials {
     wood.addItem("stickWood", 1, Material.VALUE_Shard);
     wood.addItem("plankWood", 1, Material.VALUE_Ingot);
     wood.addItem("logWood", 1, Material.VALUE_Ingot * 4);
-    wood.setRepresentativeItem(new ItemStack(Items.STICK));
     wood.addTrait(ecological, HEAD);
     wood.addTrait(splinters);
     wood.addTrait(ecological);
@@ -341,6 +292,7 @@ public final class TinkerMaterials {
     bone.addItem(new ItemStack(Items.DYE, 1, EnumDyeColor.WHITE.getDyeDamage()), 1, Material.VALUE_Fragment); // bonemeal
     bone.setRepresentativeItem(Items.BONE);
     bone.addTrait(splintering, HEAD);
+    bone.addTrait(splitting, SHAFT);
     bone.addTrait(fractured);
 
     paper.setCraftable(true);
@@ -421,7 +373,43 @@ public final class TinkerMaterials {
     steel.addTrait(sharp, HEAD);
     steel.addTrait(stiff);
 
-    registerToolMaterials();
+    // bowstring
+    string.addItemIngot("string");
+    vine.addItemIngot("vine");
+    safeAdd(slimevine_blue, new ItemStack(TinkerWorld.slimeVineBlue1), Material.VALUE_Ingot, true);
+    safeAdd(slimevine_blue, new ItemStack(TinkerWorld.slimeVineBlue2), Material.VALUE_Ingot, false);
+    safeAdd(slimevine_blue, new ItemStack(TinkerWorld.slimeVineBlue3), Material.VALUE_Ingot, false);
+    safeAdd(slimevine_purple, new ItemStack(TinkerWorld.slimeVinePurple1), Material.VALUE_Ingot, true);
+    safeAdd(slimevine_purple, new ItemStack(TinkerWorld.slimeVinePurple2), Material.VALUE_Ingot, false);
+    safeAdd(slimevine_purple, new ItemStack(TinkerWorld.slimeVinePurple3), Material.VALUE_Ingot, false);
+
+    // arrow only materials
+    blaze.addItem(Items.BLAZE_ROD, 1, Material.VALUE_Ingot);
+    blaze.setRepresentativeItem(Items.BLAZE_ROD);
+    blaze.addTrait(hovering);
+
+    reed.addItem(Items.REEDS, 1, Material.VALUE_Ingot);
+    reed.setRepresentativeItem(Items.REEDS);
+    reed.addTrait(breakable);
+
+    ice.addItem(Blocks.PACKED_ICE, Material.VALUE_Ingot);
+    ice.setRepresentativeItem(Blocks.PACKED_ICE);
+    ice.addTrait(freezing);
+
+    endrod.addItem(Blocks.END_ROD, Material.VALUE_Ingot);
+    endrod.setRepresentativeItem(Blocks.END_ROD);
+    endrod.addTrait(endspeed);
+
+    feather.addItemIngot("feather");
+    leaf.addItemIngot("treeLeaves");
+    safeAdd(slimeleaf_blue, new ItemStack(TinkerWorld.slimeLeaves, 1, BlockSlimeGrass.FoliageType.BLUE.getMeta()), Material.VALUE_Ingot, true);
+    safeAdd(slimeleaf_orange, new ItemStack(TinkerWorld.slimeLeaves, 1, BlockSlimeGrass.FoliageType.ORANGE.getMeta()), Material.VALUE_Ingot, true);
+    safeAdd(slimeleaf_purple, new ItemStack(TinkerWorld.slimeLeaves, 1, BlockSlimeGrass.FoliageType.PURPLE.getMeta()), Material.VALUE_Ingot, true);
+
+
+    registerToolMaterialStats();
+    registerBowMaterialStats();
+    registerProjectileMaterialStats();
   }
 
   private void safeAdd(Material material, ItemStack item, int value) {
@@ -434,7 +422,7 @@ public final class TinkerMaterials {
   }
 
   private void safeAdd(Material material, ItemStack item, int value, boolean representative) {
-    if(item != null) {
+    if(item != null && item.getItem() != null) {
       material.addItem(item, 1, value);
       if(representative) {
         material.setRepresentativeItem(item);
@@ -442,7 +430,7 @@ public final class TinkerMaterials {
     }
   }
 
-  public void registerToolMaterials() {
+  public void registerToolMaterialStats() {
     // Stats:                                                   Durability, speed, attack, handle, extra, harvestlevel
     // natural resources/blocks
     TinkerRegistry.addMaterialStats(wood,
@@ -483,22 +471,18 @@ public final class TinkerMaterials {
                                     new HandleMaterialStats(0.10f, 5),
                                     new ExtraMaterialStats(15));
     TinkerRegistry.addMaterialStats(sponge,
-                                    new HeadMaterialStats(550, 3.02f, 0.00f, STONE),
+                                    new HeadMaterialStats(1050, 3.02f, 0.00f, STONE),
                                     new HandleMaterialStats(1.20f, 250),
                                     new ExtraMaterialStats(250));
-    TinkerRegistry.addMaterialStats(firewood,
-                                    new HeadMaterialStats(550, 6.00f, 5.50f, STONE),
-                                    new HandleMaterialStats(1.0f, -200),
-                                    new ExtraMaterialStats(150));
 
     // Slime
     TinkerRegistry.addMaterialStats(slime,
                                     new HeadMaterialStats(1000, 4.24f, 1.80f, STONE),
-                                    new HandleMaterialStats(0.70f, -100),
+                                    new HandleMaterialStats(0.70f, 0),
                                     new ExtraMaterialStats(350));
     TinkerRegistry.addMaterialStats(blueslime,
                                     new HeadMaterialStats(780, 4.03f, 1.80f, STONE),
-                                    new HandleMaterialStats(1.30f, -100),
+                                    new HandleMaterialStats(1.30f, -50),
                                     new ExtraMaterialStats(200));
     TinkerRegistry.addMaterialStats(knightslime,
                                     new HeadMaterialStats(850, 5.8f, 5.10f, OBSIDIAN),
@@ -526,6 +510,10 @@ public final class TinkerMaterials {
                                     new HeadMaterialStats(820, 7.02f, 8.72f, COBALT),
                                     new HandleMaterialStats(0.50f, 250),
                                     new ExtraMaterialStats(50));
+    TinkerRegistry.addMaterialStats(firewood,
+                                    new HeadMaterialStats(550, 6.00f, 5.50f, STONE),
+                                    new HandleMaterialStats(1.0f, -200),
+                                    new ExtraMaterialStats(150));
 
     // Metals
     TinkerRegistry.addMaterialStats(iron,
@@ -571,12 +559,70 @@ public final class TinkerMaterials {
     //TinkerRegistry.addMaterialStats(xu,         new ToolMaterialStats(97, 1.00f, 1.00f, 0.10f, 0.20f, DIAMOND));
   }
 
-  public void registerBowMaterials() {
+  public void registerBowMaterialStats() {
+    BowMaterialStats whyWouldYouMakeABowOutOfThis = new BowMaterialStats(0.2f, 0.4f);
 
+    TinkerRegistry.addMaterialStats(wood, new BowMaterialStats(1f, 1f));
+    TinkerRegistry.addMaterialStats(stone, whyWouldYouMakeABowOutOfThis);
+    TinkerRegistry.addMaterialStats(flint, whyWouldYouMakeABowOutOfThis);
+    TinkerRegistry.addMaterialStats(cactus, new BowMaterialStats(1.05f, 0.9f));
+    TinkerRegistry.addMaterialStats(bone, new BowMaterialStats(0.95f, 1.15f));
+    TinkerRegistry.addMaterialStats(obsidian, whyWouldYouMakeABowOutOfThis);
+    TinkerRegistry.addMaterialStats(prismarine, whyWouldYouMakeABowOutOfThis);
+    TinkerRegistry.addMaterialStats(endstone, whyWouldYouMakeABowOutOfThis);
+    TinkerRegistry.addMaterialStats(paper, new BowMaterialStats(2f, 0.5f));
+    TinkerRegistry.addMaterialStats(sponge, new BowMaterialStats(1.15f, 0.75f));
+
+
+    // Slime
+    TinkerRegistry.addMaterialStats(slime, new BowMaterialStats(0.85f, 1.3f));
+    TinkerRegistry.addMaterialStats(blueslime, new BowMaterialStats(1.05f, 1f));
+    TinkerRegistry.addMaterialStats(knightslime, new BowMaterialStats(0.4f, 2f));
+    TinkerRegistry.addMaterialStats(magmaslime, new BowMaterialStats(1.1f, 1.05f));
+
+    // Nether
+    TinkerRegistry.addMaterialStats(netherrack, whyWouldYouMakeABowOutOfThis);
+    TinkerRegistry.addMaterialStats(cobalt, new BowMaterialStats(0.75f, 1.3f));
+    TinkerRegistry.addMaterialStats(ardite, new BowMaterialStats(0.45f, 0.8f));
+    TinkerRegistry.addMaterialStats(manyullyn, new BowMaterialStats(0.65f, 1.2f));
+    TinkerRegistry.addMaterialStats(firewood, new BowMaterialStats(1f, 1f));
+
+    // Metals
+    TinkerRegistry.addMaterialStats(iron, new BowMaterialStats(0.5f, 1.5f));
+    TinkerRegistry.addMaterialStats(pigiron, new BowMaterialStats(0.6f, 1.4f));
+
+    // Mod Integration
+    TinkerRegistry.addMaterialStats(copper, new BowMaterialStats(0.6f, 1.45f));
+    TinkerRegistry.addMaterialStats(bronze, new BowMaterialStats(0.55f, 1.5f));
+    TinkerRegistry.addMaterialStats(lead, new BowMaterialStats(0.4f, 1.3f));
+    TinkerRegistry.addMaterialStats(silver, new BowMaterialStats(1.2f, 0.8f));
+    TinkerRegistry.addMaterialStats(electrum, new BowMaterialStats(1.5f, 1f));
+    TinkerRegistry.addMaterialStats(steel, new BowMaterialStats(0.4f, 2f));
+
+    // Bowstring materials
+    BowStringMaterialStats bowstring = new BowStringMaterialStats(1f);
+    TinkerRegistry.addMaterialStats(string, bowstring);
+    TinkerRegistry.addMaterialStats(vine, bowstring);
+    TinkerRegistry.addMaterialStats(slimevine_blue, bowstring);
+    TinkerRegistry.addMaterialStats(slimevine_purple, bowstring);
   }
 
-  public void registerProjectileMaterials() {
+  public void registerProjectileMaterialStats() {
+    // shaft
+    TinkerRegistry.addMaterialStats(wood, new ArrowShaftMaterialStats(1f, 0));
+    TinkerRegistry.addMaterialStats(bone, new ArrowShaftMaterialStats(0.9f, 5));
+    TinkerRegistry.addMaterialStats(blaze, new ArrowShaftMaterialStats(0.8f, 3));
+    TinkerRegistry.addMaterialStats(reed, new ArrowShaftMaterialStats(1.5f, 20));
+    TinkerRegistry.addMaterialStats(ice, new ArrowShaftMaterialStats(0.95f, 0));
+    TinkerRegistry.addMaterialStats(endrod, new ArrowShaftMaterialStats(0.7f, 1));
 
+    // fletching
+    TinkerRegistry.addMaterialStats(feather, new FletchingMaterialStats(1.0f, 1f));
+    TinkerRegistry.addMaterialStats(leaf, new FletchingMaterialStats(0.5f, 1.5f));
+    FletchingMaterialStats slimeLeafStats = new FletchingMaterialStats(0.8f, 1.25f);
+    TinkerRegistry.addMaterialStats(slimeleaf_purple, slimeLeafStats);
+    TinkerRegistry.addMaterialStats(slimeleaf_blue, slimeLeafStats);
+    TinkerRegistry.addMaterialStats(slimeleaf_orange, slimeLeafStats);
   }
 
   @Subscribe

@@ -10,7 +10,8 @@ import slimeknights.tconstruct.library.tools.ToolNBT;
 import slimeknights.tconstruct.library.utils.TagUtil;
 import slimeknights.tconstruct.library.utils.ToolBuilder;
 import slimeknights.tconstruct.tools.TinkerMaterials;
-import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.TinkerTraits;
 
 public class ModSilktouch extends ToolModifier {
 
@@ -23,13 +24,13 @@ public class ModSilktouch extends ToolModifier {
   @Override
   public boolean canApplyTogether(Enchantment enchantment) {
     return enchantment != Enchantments.LOOTING
-        && enchantment != Enchantments.FORTUNE;
+           && enchantment != Enchantments.FORTUNE;
   }
 
   @Override
   public boolean canApplyTogether(IToolMod otherModifier) {
-    return !otherModifier.getIdentifier().equals(TinkerMaterials.squeaky.getIdentifier())
-        && !otherModifier.getIdentifier().equals(TinkerTools.modLuck.getIdentifier());
+    return !otherModifier.getIdentifier().equals(TinkerTraits.squeaky.getIdentifier())
+           && !otherModifier.getIdentifier().equals(TinkerModifiers.modLuck.getIdentifier());
   }
 
   @Override

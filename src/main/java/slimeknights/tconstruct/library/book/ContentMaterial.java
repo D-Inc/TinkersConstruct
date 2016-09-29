@@ -22,18 +22,19 @@ import slimeknights.mantle.client.gui.book.element.ElementItem;
 import slimeknights.mantle.client.gui.book.element.ElementText;
 import slimeknights.mantle.util.LocUtils;
 import slimeknights.tconstruct.library.TinkerRegistry;
-import slimeknights.tconstruct.library.materials.ExtraMaterialStats;
-import slimeknights.tconstruct.library.materials.HandleMaterialStats;
-import slimeknights.tconstruct.library.materials.HeadMaterialStats;
 import slimeknights.tconstruct.library.materials.IMaterialStats;
 import slimeknights.tconstruct.library.materials.Material;
+import slimeknights.tconstruct.library.materials.MaterialTypes;
 import slimeknights.tconstruct.library.tools.IToolPart;
 import slimeknights.tconstruct.library.tools.ToolCore;
 import slimeknights.tconstruct.library.traits.ITrait;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.BlockCasting;
 import slimeknights.tconstruct.tools.TinkerTools;
-import slimeknights.tconstruct.tools.block.BlockToolTable;
+import slimeknights.tconstruct.tools.common.block.BlockToolTable;
+import slimeknights.tconstruct.tools.harvest.TinkerHarvestTools;
+import slimeknights.tconstruct.tools.melee.TinkerMeleeWeapons;
+import slimeknights.tconstruct.tools.ranged.TinkerRangedWeapons;
 
 @SideOnly(Side.CLIENT)
 public class ContentMaterial extends TinkerPage {
@@ -74,13 +75,13 @@ public class ContentMaterial extends TinkerPage {
     LinkedHashSet<ITrait> allTraits = new LinkedHashSet<ITrait>();
 
     // head stats
-    addStatsDisplay(x, y, w, list, allTraits, HeadMaterialStats.TYPE);
+    addStatsDisplay(x, y, w, list, allTraits, MaterialTypes.HEAD);
     // handle
-    addStatsDisplay(x + w, y, w - 10, list, allTraits, HandleMaterialStats.TYPE);
+    addStatsDisplay(x + w, y, w - 10, list, allTraits, MaterialTypes.HANDLE);
 
     // extra
-    y += 65 + 10 * material.getAllTraitsForStats(HeadMaterialStats.TYPE).size();
-    addStatsDisplay(x, y, w, list, allTraits, ExtraMaterialStats.TYPE);
+    y += 65 + 10 * material.getAllTraitsForStats(MaterialTypes.HEAD).size();
+    addStatsDisplay(x, y, w, list, allTraits, MaterialTypes.EXTRA);
 
     // inspirational quote
     String flavour = parent.parent.parent.strings.get(String.format("%s.flavour", material.getIdentifier()));
@@ -167,9 +168,9 @@ public class ContentMaterial extends TinkerPage {
     }
 
     // build a range of tools to fill the "bar" at the side
-    ToolCore[] tools = new ToolCore[]{TinkerTools.pickaxe, TinkerTools.mattock, TinkerTools.broadSword,
-                                      TinkerTools.hammer, TinkerTools.cleaver, TinkerTools.shuriken,
-                                      TinkerTools.fryPan, TinkerTools.lumberAxe, TinkerTools.battleSign};
+    ToolCore[] tools = new ToolCore[]{TinkerHarvestTools.pickaxe, TinkerHarvestTools.mattock, TinkerMeleeWeapons.broadSword,
+                                      TinkerHarvestTools.hammer, TinkerMeleeWeapons.cleaver, TinkerRangedWeapons.shuriken,
+                                      TinkerMeleeWeapons.fryPan, TinkerHarvestTools.lumberAxe, TinkerMeleeWeapons.battleSign};
 
     for(ToolCore tool : tools) {
       if(tool == null) {

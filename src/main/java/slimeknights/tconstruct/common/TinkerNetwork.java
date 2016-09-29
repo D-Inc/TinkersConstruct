@@ -14,19 +14,19 @@ import slimeknights.tconstruct.common.config.ConfigSyncPacket;
 import slimeknights.tconstruct.common.network.SpawnParticlePacket;
 import slimeknights.tconstruct.smeltery.network.FaucetActivationPacket;
 import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket;
+import slimeknights.tconstruct.smeltery.network.HeatingStructureFuelUpdatePacket;
 import slimeknights.tconstruct.smeltery.network.SmelteryFluidClicked;
 import slimeknights.tconstruct.smeltery.network.SmelteryFluidUpdatePacket;
-import slimeknights.tconstruct.smeltery.network.SmelteryFuelUpdatePacket;
 import slimeknights.tconstruct.smeltery.network.SmelteryInventoryUpdatePacket;
-import slimeknights.tconstruct.tools.network.EntityMovementChangePacket;
-import slimeknights.tconstruct.tools.network.InventoryCraftingSyncPacket;
-import slimeknights.tconstruct.tools.network.InventorySlotSyncPacket;
-import slimeknights.tconstruct.tools.network.PartCrafterSelectionPacket;
-import slimeknights.tconstruct.tools.network.StencilTableSelectionPacket;
-import slimeknights.tconstruct.tools.network.TinkerStationTabPacket;
-import slimeknights.tconstruct.tools.network.ToolBreakAnimationPacket;
-import slimeknights.tconstruct.tools.network.ToolStationSelectionPacket;
-import slimeknights.tconstruct.tools.network.ToolStationTextPacket;
+import slimeknights.tconstruct.tools.common.network.EntityMovementChangePacket;
+import slimeknights.tconstruct.tools.common.network.InventoryCraftingSyncPacket;
+import slimeknights.tconstruct.tools.common.network.InventorySlotSyncPacket;
+import slimeknights.tconstruct.tools.common.network.PartCrafterSelectionPacket;
+import slimeknights.tconstruct.tools.common.network.StencilTableSelectionPacket;
+import slimeknights.tconstruct.tools.common.network.TinkerStationTabPacket;
+import slimeknights.tconstruct.tools.common.network.ToolBreakAnimationPacket;
+import slimeknights.tconstruct.tools.common.network.ToolStationSelectionPacket;
+import slimeknights.tconstruct.tools.common.network.ToolStationTextPacket;
 
 public class TinkerNetwork extends NetworkWrapper {
 
@@ -54,7 +54,7 @@ public class TinkerNetwork extends NetworkWrapper {
 
     // SMELTERY
     registerPacketClient(SmelteryFluidUpdatePacket.class);
-    registerPacketClient(SmelteryFuelUpdatePacket.class);
+    registerPacketClient(HeatingStructureFuelUpdatePacket.class);
     registerPacketClient(SmelteryInventoryUpdatePacket.class);
     registerPacketServer(SmelteryFluidClicked.class);
     registerPacketClient(FluidUpdatePacket.class);

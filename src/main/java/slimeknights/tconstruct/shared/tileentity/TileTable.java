@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.shared.tileentity;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockPane;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.entity.EntityLivingBase;
@@ -26,8 +27,7 @@ import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.client.model.ModelHelper;
 import slimeknights.tconstruct.shared.block.BlockTable;
 import slimeknights.tconstruct.shared.block.PropertyTableItem;
-import slimeknights.tconstruct.shared.client.BakedColoredItemModel;
-import slimeknights.tconstruct.tools.network.InventorySlotSyncPacket;
+import slimeknights.tconstruct.tools.common.network.InventorySlotSyncPacket;
 
 public class TileTable extends TileInventory {
 
@@ -93,21 +93,15 @@ public class TileTable extends TileInventory {
       return null;
     }
 
-    IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, entity);
-    if(model == null || model.isBuiltInRenderer()) {
-      // missing model so people don't go paranoid when their chests go missing
-      model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getMissingModel();
-    }
-    else {
-      // take color into account
-      model = new BakedColoredItemModel(stack, model);
-    }
+    IBakedModel model = ModelHelper.getBakedModelForItem(stack, world, entity);
 
     PropertyTableItem.TableItem item = new PropertyTableItem.TableItem(model, 0, -0.46875f, 0, 0.8f, (float) (Math.PI / 2));
     if(stack.getItem() instanceof ItemBlock) {
-      item.y = -0.3125f;
+      if(!(Block.getBlockFromItem(stack.getItem())  instanceof BlockPane)) {
+        item.y = -0.3125f;
+        item.r = 0;
+      }
       item.s = 0.375f;
-      item.r = 0;
     }
     return item;
   }
@@ -115,7 +109,7 @@ public class TileTable extends TileInventory {
   @Override
   public SPacketUpdateTileEntity getUpdatePacket() {
     // note that this sends all of the tile data. you should change this if you use additional tile data
-    NBTTagCompound tag = (NBTTagCompound) getTileData().copy();
+    NBTTagCompound tag = getTileData().copy();
     writeToNBT(tag);
     return new SPacketUpdateTileEntity(this.getPos(), this.getBlockMetadata(), tag);
   }

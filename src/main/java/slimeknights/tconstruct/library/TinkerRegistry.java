@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
 import slimeknights.mantle.client.CreativeTab;
 import slimeknights.mantle.util.RecipeMatch;
 import slimeknights.tconstruct.library.events.MaterialEvent;
+import slimeknights.tconstruct.library.events.TinkerRegisterEvent;
 import slimeknights.tconstruct.library.materials.IMaterialStats;
 import slimeknights.tconstruct.library.materials.Material;
 import slimeknights.tconstruct.library.modifiers.IModifier;
@@ -152,8 +153,9 @@ public final class TinkerRegistry {
   public static Collection<Material> getAllMaterialsWithStats(String statType) {
     ImmutableList.Builder<Material> mats = ImmutableList.builder();
     for(Material material : materials.values()) {
-      if(material.hasStats(statType))
+      if(material.hasStats(statType)) {
         mats.add(material);
+      }
     }
 
     return mats.build();
@@ -465,26 +467,28 @@ public final class TinkerRegistry {
   /** Registers this item with all its metadatas to melt into amount of the given fluid. */
   public static void registerMelting(Item item, Fluid fluid, int amount) {
     ItemStack stack = new ItemStack(item, 1, OreDictionary.WILDCARD_VALUE);
-    meltingRegistry.add(new MeltingRecipe(new RecipeMatch.Item(stack, 1, amount), fluid));
+    registerMelting(new MeltingRecipe(new RecipeMatch.Item(stack, 1, amount), fluid));
   }
 
   /** Registers this block with all its metadatas to melt into amount of the given fluid. */
   public static void registerMelting(Block block, Fluid fluid, int amount) {
     ItemStack stack = new ItemStack(block, 1, OreDictionary.WILDCARD_VALUE);
-    meltingRegistry.add(new MeltingRecipe(new RecipeMatch.Item(stack, 1, amount), fluid));
+    registerMelting(new MeltingRecipe(new RecipeMatch.Item(stack, 1, amount), fluid));
   }
 
   /** Registers this itemstack NBT-SENSITIVE to melt into amount of the given fluid. */
   public static void registerMelting(ItemStack stack, Fluid fluid, int amount) {
-    meltingRegistry.add(new MeltingRecipe(new RecipeMatch.ItemCombination(amount, stack), fluid));
+    registerMelting(new MeltingRecipe(new RecipeMatch.ItemCombination(amount, stack), fluid));
   }
 
   public static void registerMelting(String oredict, Fluid fluid, int amount) {
-    meltingRegistry.add(new MeltingRecipe(new RecipeMatch.Oredict(oredict, 1, amount), fluid));
+    registerMelting(new MeltingRecipe(new RecipeMatch.Oredict(oredict, 1, amount), fluid));
   }
 
   public static void registerMelting(MeltingRecipe recipe) {
-    meltingRegistry.add(recipe);
+    if(new TinkerRegisterEvent.MestingRegisterEvent(recipe).fire()) {
+      meltingRegistry.add(recipe);
+    }
   }
 
   public static MeltingRecipe getMelting(ItemStack stack) {
@@ -509,7 +513,13 @@ public final class TinkerRegistry {
       error("Alloy Recipe: Alloy for %s must consist of at least 2 liquids", result.getLocalizedName());
     }
 
-    alloyRegistry.add(new AlloyRecipe(result, inputs));
+    registerAlloy(new AlloyRecipe(result, inputs));
+  }
+
+  public static void registerAlloy(AlloyRecipe recipe) {
+    if(new TinkerRegisterEvent.AlloyRegisterEvent(recipe).fire()) {
+      alloyRegistry.add(recipe);
+    }
   }
 
   public static List<AlloyRecipe> getAlloys() {
@@ -522,11 +532,13 @@ public final class TinkerRegistry {
     if(cast != null) {
       rm = RecipeMatch.ofNBT(cast);
     }
-    tableCastRegistry.add(new CastingRecipe(output, rm, fluid, amount));
+    registerTableCasting(new CastingRecipe(output, rm, fluid, amount));
   }
 
   public static void registerTableCasting(ICastingRecipe recipe) {
-    tableCastRegistry.add(recipe);
+    if(new TinkerRegisterEvent.TableCastingRegisterEvent(recipe).fire()) {
+      tableCastRegistry.add(recipe);
+    }
   }
 
   public static ICastingRecipe getTableCasting(@Nullable ItemStack cast, Fluid fluid) {
@@ -549,11 +561,13 @@ public final class TinkerRegistry {
     if(cast != null) {
       rm = RecipeMatch.ofNBT(cast);
     }
-    basinCastRegistry.add(new CastingRecipe(output, rm, fluid, amount));
+    registerBasinCasting(new CastingRecipe(output, rm, fluid, amount));
   }
 
   public static void registerBasinCasting(ICastingRecipe recipe) {
-    basinCastRegistry.add(recipe);
+    if(new TinkerRegisterEvent.BasinCastingRegisterEvent(recipe).fire()) {
+      basinCastRegistry.add(recipe);
+    }
   }
 
   public static ICastingRecipe getBasinCasting(@Nullable ItemStack cast, Fluid fluid) {
@@ -572,6 +586,7 @@ public final class TinkerRegistry {
   /**
    * Registers a liquid to be used as smeltery fuel.
    * Temperature is derived from fluid temperature.
+   *
    * @param fluidStack   The fluid. Amount is the minimal increment that is consumed at once.
    * @param fuelDuration How many ticks the consumtpion of the fluidStack lasts.
    */
@@ -597,7 +612,7 @@ public final class TinkerRegistry {
         FluidStack fuel = entry.getKey();
         int out = entry.getValue();
         if(in.amount < fuel.amount) {
-          float coeff = (float)in.amount/(float)fuel.amount;
+          float coeff = (float) in.amount / (float) fuel.amount;
           out = Math.round(coeff * in.amount);
           in.amount = 0;
         }
@@ -625,7 +640,10 @@ public final class TinkerRegistry {
       error("Entity Melting: Entity %s is not registered in the EntityList", clazz.getSimpleName());
     }
 
-    entityMeltingRegistry.put(name, liquid);
+    TinkerRegisterEvent.EntityMeltingRegisterEvent event = new TinkerRegisterEvent.EntityMeltingRegisterEvent(clazz, liquid);
+    if(event.fire()) {
+      entityMeltingRegistry.put(name, event.getNewFluidStack());
+    }
   }
 
   public static FluidStack getMeltingForEntity(Entity entity) {
@@ -645,102 +663,115 @@ public final class TinkerRegistry {
   public static List<DryingRecipe> getAllDryingRecipes() {
     return ImmutableList.copyOf(dryingRegistry);
   }
-  
+
   /**
    * Adds a new drying recipe
-   * @param input Input ItemStack
+   *
+   * @param input  Input ItemStack
    * @param output Output ItemStack
-   * @param time Recipe time in ticks
+   * @param time   Recipe time in ticks
    */
-  public static void registerDryingRecipe (ItemStack input, ItemStack output, int time) {
-    if ( output == null || input == null ) {
+  public static void registerDryingRecipe(ItemStack input, ItemStack output, int time) {
+    if(output == null || input == null) {
       return;
     }
-    dryingRegistry.add(new DryingRecipe(new RecipeMatch.Item(input, 1), output, time));
+    addDryingReciye(new DryingRecipe(new RecipeMatch.Item(input, 1), output, time));
   }
-  
+
   /**
    * Adds a new drying recipe
-   * @param input Input Item
+   *
+   * @param input  Input Item
    * @param output Output ItemStack
-   * @param time Recipe time in ticks
-   */  
-  public static void registerDryingRecipe (Item input, ItemStack output, int time) {
-    if ( output == null || input == null ) {
+   * @param time   Recipe time in ticks
+   */
+  public static void registerDryingRecipe(Item input, ItemStack output, int time) {
+    if(output == null || input == null) {
       return;
     }
-    
+
     ItemStack stack = new ItemStack(input, 1, OreDictionary.WILDCARD_VALUE);
-    dryingRegistry.add(new DryingRecipe(new RecipeMatch.Item(stack, 1), output, time));
+    addDryingReciye(new DryingRecipe(new RecipeMatch.Item(stack, 1), output, time));
   }
-  
+
   /**
    * Adds a new drying recipe
-   * @param input Input Item
+   *
+   * @param input  Input Item
    * @param output Output Item
-   * @param time Recipe time in ticks
-   */   
-  public static void registerDryingRecipe (Item input, Item output, int time) {
-    if ( output == null || input == null ) {
+   * @param time   Recipe time in ticks
+   */
+  public static void registerDryingRecipe(Item input, Item output, int time) {
+    if(output == null || input == null) {
       return;
     }
 
     ItemStack stack = new ItemStack(input, 1, OreDictionary.WILDCARD_VALUE);
-    dryingRegistry.add(new DryingRecipe(new RecipeMatch.Item(stack, 1), new ItemStack(output), time));
+    addDryingReciye(new DryingRecipe(new RecipeMatch.Item(stack, 1), new ItemStack(output), time));
   }
-  
+
   /**
    * Adds a new drying recipe
-   * @param input Input Block
+   *
+   * @param input  Input Block
    * @param output Output Block
-   * @param time Recipe time in ticks
-   */   
-  public static void registerDryingRecipe (Block input, Block output, int time) {
-    if ( output == null || input == null ) {
+   * @param time   Recipe time in ticks
+   */
+  public static void registerDryingRecipe(Block input, Block output, int time) {
+    if(output == null || input == null) {
       return;
     }
-    
+
     ItemStack stack = new ItemStack(input, 1, OreDictionary.WILDCARD_VALUE);
-    dryingRegistry.add(new DryingRecipe(new RecipeMatch.Item(stack, 1), new ItemStack(output), time));
+    addDryingReciye(new DryingRecipe(new RecipeMatch.Item(stack, 1), new ItemStack(output), time));
   }
 
   /**
    * Adds a new drying recipe
+   *
    * @param oredict Input ore dictionary entry
-   * @param output Output ItemStack
-   * @param time Recipe time in ticks
-   */ 
-  public static void registerDryingRecipe (String oredict, ItemStack output, int time) {
-    if ( output == null || oredict == null ) {
+   * @param output  Output ItemStack
+   * @param time    Recipe time in ticks
+   */
+  public static void registerDryingRecipe(String oredict, ItemStack output, int time) {
+    if(output == null || oredict == null) {
       return;
     }
-    
-    dryingRegistry.add(new DryingRecipe(new RecipeMatch.Oredict(oredict, 1), output, time));
+
+    addDryingReciye(new DryingRecipe(new RecipeMatch.Oredict(oredict, 1), output, time));
   }
-  
+
+  private static void addDryingReciye(DryingRecipe dryingRecipe) {
+    if(new TinkerRegisterEvent.DryingRackRegisterEvent(dryingRecipe).fire()) {
+      dryingRegistry.add(dryingRecipe);
+    }
+  }
+
   /**
    * Gets the drying time for a drying recipe
+   *
    * @param input Input ItemStack
    * @return Output drying time, or -1 if no recipe is found
    */
-  public static int getDryingTime (ItemStack input) {
-    for (DryingRecipe r : dryingRegistry) {
-      if (r.matches(input)) {
+  public static int getDryingTime(ItemStack input) {
+    for(DryingRecipe r : dryingRegistry) {
+      if(r.matches(input)) {
         return r.getTime();
       }
     }
 
     return -1;
   }
-  
+
   /**
    * Gets the result for a drying recipe
+   *
    * @param input Input ItemStack
    * @return Output A copy of the output ItemStack, or null if no recipe is found
-   */  
-  public static ItemStack getDryingResult (ItemStack input) {
-    for (DryingRecipe r : dryingRegistry) {
-      if (r.matches(input)) {
+   */
+  public static ItemStack getDryingResult(ItemStack input) {
+    for(DryingRecipe r : dryingRegistry) {
+      if(r.matches(input)) {
         return r.getResult();
       }
     }

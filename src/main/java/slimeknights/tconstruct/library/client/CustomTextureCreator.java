@@ -50,6 +50,8 @@ import slimeknights.tconstruct.library.tools.Pattern;
  */
 public class CustomTextureCreator implements IResourceManagerReloadListener {
 
+  public static final CustomTextureCreator INSTANCE = new CustomTextureCreator();
+
   private static Logger log = Util.getLogger("TextureGen");
 
   /**
@@ -59,12 +61,22 @@ public class CustomTextureCreator implements IResourceManagerReloadListener {
 
   private static Set<ResourceLocation> baseTextures = Sets.newHashSet();
 
+  private static Map<ResourceLocation, Set<IToolPart>> texturePartMapping = Maps.newHashMap();
+
   public static void registerTextures(Collection<ResourceLocation> textures) {
     baseTextures.addAll(textures);
   }
 
   public static void registerTexture(ResourceLocation texture) {
     baseTextures.add(texture);
+  }
+
+  public static void registerTextureForPart(ResourceLocation texture, IToolPart toolPart) {
+    if(!texturePartMapping.containsKey(texture)) {
+      texturePartMapping.put(texture, Sets.<IToolPart>newHashSet());
+    }
+    texturePartMapping.get(texture).add(toolPart);
+    registerTexture(texture);
   }
 
   // set these to the pattern/cast model to generate part-textures for them
@@ -111,12 +123,26 @@ public class CustomTextureCreator implements IResourceManagerReloadListener {
         log.error("Missing base texture: " + baseTexture.toString());
         continue;
       }
+      Set<IToolPart> parts = texturePartMapping.get(baseTexture);
 
       Map<String, TextureAtlasSprite> builtSprites = Maps.newHashMap();
       for(Material material : TinkerRegistry.getAllMaterials()) {
-        TextureAtlasSprite sprite = createTexture(material, baseTexture, base, map);
-        if(sprite != null) {
-          builtSprites.put(material.identifier, sprite);
+        boolean usable;
+        if(parts == null || material instanceof MaterialGUI) {
+          usable = true;
+        }
+        else {
+          usable = false;
+          for(IToolPart toolPart : parts) {
+            usable |= toolPart.canUseMaterial(material);
+          }
+        }
+
+        if(usable) {
+          TextureAtlasSprite sprite = createTexture(material, baseTexture, base, map);
+          if(sprite != null) {
+            builtSprites.put(material.identifier, sprite);
+          }
         }
       }
 

@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import slimeknights.mantle.util.RecipeMatch;
 import slimeknights.tconstruct.common.ClientProxy;
+import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.TinkerRegistry;
 import slimeknights.tconstruct.library.Util;
 import slimeknights.tconstruct.library.materials.ExtraMaterialStats;
@@ -41,9 +43,11 @@ import slimeknights.tconstruct.library.materials.HandleMaterialStats;
 import slimeknights.tconstruct.library.materials.HeadMaterialStats;
 import slimeknights.tconstruct.library.materials.IMaterialStats;
 import slimeknights.tconstruct.library.materials.Material;
+import slimeknights.tconstruct.library.materials.MaterialTypes;
 import slimeknights.tconstruct.library.modifiers.IModifier;
 import slimeknights.tconstruct.library.modifiers.ModifierNBT;
 import slimeknights.tconstruct.library.tinkering.Category;
+import slimeknights.tconstruct.library.tinkering.IToolStationDisplay;
 import slimeknights.tconstruct.library.tinkering.PartMaterialType;
 import slimeknights.tconstruct.library.tinkering.TinkersItem;
 import slimeknights.tconstruct.library.traits.ITrait;
@@ -59,7 +63,7 @@ import slimeknights.tconstruct.tools.traits.InfiTool;
  * Intermediate abstraction layer for all tools/melee weapons. This class has all the callbacks for blocks and enemies
  * so tools and weapons can share behaviour.
  */
-public abstract class ToolCore extends TinkersItem {
+public abstract class ToolCore extends TinkersItem implements IToolStationDisplay {
 
   public final static int DEFAULT_MODIFIERS = 3;
 
@@ -90,6 +94,11 @@ public abstract class ToolCore extends TinkersItem {
   @Override
   public boolean isDamageable() {
     return true;
+  }
+
+  @Override
+  public boolean showDurabilityBar(ItemStack stack) {
+    return super.showDurabilityBar(stack) && !ToolHelper.isBroken(stack);
   }
 
   /* Tool and Weapon specific properties */
@@ -253,6 +262,10 @@ public abstract class ToolCore extends TinkersItem {
       info.addHarvestLevel();
       info.addMiningSpeed();
     }
+    if(hasCategory(Category.LAUNCHER)) {
+      info.addDrawSpeed();
+      info.addRange();
+    }
     info.addAttack();
 
     if(ToolHelper.getFreeModifiers(stack) > 0) {
@@ -369,23 +382,27 @@ public abstract class ToolCore extends TinkersItem {
     addDefaultSubItems(subItems);
   }
 
-  protected void addDefaultSubItems(List<ItemStack> subItems) {
+  protected void addDefaultSubItems(List<ItemStack> subItems, Material... fixedMaterials) {
     for(Material head : TinkerRegistry.getAllMaterials()) {
-      if(!head.hasStats(HeadMaterialStats.TYPE)) {
-        continue;
-      }
-
       List<Material> mats = new ArrayList<Material>(requiredComponents.length);
 
       for(int i = 0; i < requiredComponents.length; i++) {
-        // todo: check for applicability with stats
-        mats.add(head);
+        if(fixedMaterials.length > i && fixedMaterials[i] != null && requiredComponents[i].isValidMaterial(fixedMaterials[i])) {
+          mats.add(fixedMaterials[i]);
+        }
+        else {
+          // todo: check for applicability with stats
+          mats.add(head);
+        }
       }
 
       ItemStack tool = buildItem(mats);
       // only valid ones
       if(hasValidMaterials(tool)) {
         subItems.add(tool);
+        if(!Config.listAllMaterials) {
+          break;
+        }
       }
     }
   }
@@ -411,7 +428,6 @@ public abstract class ToolCore extends TinkersItem {
   @Override
   public int getHarvestLevel(ItemStack stack, @Nonnull String toolClass) {
     if(this.getToolClasses(stack).contains(toolClass)) {
-      NBTTagCompound tag = TagUtil.getToolTag(stack);
       // will return 0 if the tag has no info anyway
       return ToolHelper.getHarvestLevelStat(stack);
     }
@@ -424,6 +440,7 @@ public abstract class ToolCore extends TinkersItem {
   }
 
   /** The tools name completely without material information */
+  @Override
   public String getLocalizedToolName() {
     return Util.translate(getUnlocalizedName() + ".name");
   }
@@ -453,10 +470,10 @@ public abstract class ToolCore extends TinkersItem {
     }
 
     RecipeMatch.removeMatch(repairItems, match);
-    HeadMaterialStats stats = material.getStats(HeadMaterialStats.TYPE);
+    HeadMaterialStats stats = material.getStats(MaterialTypes.HEAD);
     float durability = stats.durability * match.amount * TinkerTools.sharpeningKit.getCost();
     durability /= Material.VALUE_Ingot;
-    return (int)(durability);
+    return (int) (durability);
   }
 
   /* Additional Trait callbacks */
@@ -501,9 +518,8 @@ public abstract class ToolCore extends TinkersItem {
   }
 
   // elevate to public
-  @Nonnull
   @Override
-  public RayTraceResult rayTrace(World worldIn, EntityPlayer playerIn, boolean useLiquids) {
+  public RayTraceResult rayTrace(@Nonnull World worldIn, @Nonnull EntityPlayer playerIn, boolean useLiquids) {
     return super.rayTrace(worldIn, playerIn, useLiquids);
   }
 
@@ -519,6 +535,10 @@ public abstract class ToolCore extends TinkersItem {
   @SideOnly(Side.CLIENT)
   @Override
   public boolean shouldCauseReequipAnimation(ItemStack oldStack, @Nonnull ItemStack newStack, boolean slotChanged) {
+    if(TagUtil.getResetFlag(newStack)) {
+      TagUtil.setResetFlag(newStack, false);
+      return true;
+    }
     if(oldStack == newStack) {
       return false;
     }
@@ -565,14 +585,14 @@ public abstract class ToolCore extends TinkersItem {
     ToolNBT data = new ToolNBT();
 
     if(materials.size() >= 2) {
-      HandleMaterialStats handle = materials.get(0).getStatsOrUnknown(HandleMaterialStats.TYPE);
-      HeadMaterialStats head = materials.get(1).getStatsOrUnknown(HeadMaterialStats.TYPE);
+      HandleMaterialStats handle = materials.get(0).getStatsOrUnknown(MaterialTypes.HANDLE);
+      HeadMaterialStats head = materials.get(1).getStatsOrUnknown(MaterialTypes.HEAD);
       // start with head
       data.head(head);
 
       // add in accessoires if present
       if(materials.size() >= 3) {
-        ExtraMaterialStats binding = materials.get(2).getStatsOrUnknown(ExtraMaterialStats.TYPE);
+        ExtraMaterialStats binding = materials.get(2).getStatsOrUnknown(MaterialTypes.EXTRA);
         data.extra(binding);
       }
 

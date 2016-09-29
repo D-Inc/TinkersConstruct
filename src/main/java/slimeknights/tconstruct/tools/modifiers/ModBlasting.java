@@ -26,7 +26,8 @@ import slimeknights.tconstruct.library.modifiers.ModifierTrait;
 import slimeknights.tconstruct.library.utils.TinkerUtil;
 import slimeknights.tconstruct.library.utils.ToolHelper;
 import slimeknights.tconstruct.tools.TinkerMaterials;
-import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.TinkerTraits;
 
 public class ModBlasting extends ModifierTrait {
 
@@ -48,17 +49,17 @@ public class ModBlasting extends ModifierTrait {
   @Override
   public boolean canApplyTogether(Enchantment enchantment) {
     return enchantment != Enchantments.SILK_TOUCH
-        && enchantment != Enchantments.LOOTING
-        && enchantment != Enchantments.FORTUNE;
+           && enchantment != Enchantments.LOOTING
+           && enchantment != Enchantments.FORTUNE;
   }
 
   @Override
   public boolean canApplyTogether(IToolMod toolmod) {
     String id = toolmod.getIdentifier();
-    return !id.equals(TinkerTools.modLuck.getModifierIdentifier())
-        && !id.equals(TinkerTools.modSilktouch.getIdentifier())
-        && !id.equals(TinkerMaterials.squeaky.getIdentifier())
-        && !id.equals(TinkerMaterials.autosmelt.getIdentifier());
+    return !id.equals(TinkerModifiers.modLuck.getModifierIdentifier())
+           && !id.equals(TinkerModifiers.modSilktouch.getIdentifier())
+           && !id.equals(TinkerTraits.squeaky.getIdentifier())
+           && !id.equals(TinkerTraits.autosmelt.getIdentifier());
   }
 
   private int getLevel(ItemStack tool) {
@@ -91,8 +92,8 @@ public class ModBlasting extends ModifierTrait {
       speed /= 10f;
     }
 
-    float weight1 = (float)level/(float)maxLevel;
-    float weight2 = 1f - (float)level/(float)maxLevel;
+    float weight1 = (float) level / (float) maxLevel;
+    float weight2 = 1f - (float) level / (float) maxLevel;
 
     // we weight the speed depending on how much the current level is. So 0 = full old speed, 10 = full new speed, 5 = in the middle
     float totalSpeed = speed * weight1 + event.getOriginalSpeed() * weight2;
@@ -103,7 +104,7 @@ public class ModBlasting extends ModifierTrait {
 
   private float getBlockDestroyChange(ItemStack tool) {
     float level = getLevel(tool);
-    float chancePerLevel = 1f/(float)maxLevel;
+    float chancePerLevel = 1f / (float) maxLevel;
     return level * chancePerLevel;
   }
 

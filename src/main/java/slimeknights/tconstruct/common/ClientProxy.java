@@ -11,6 +11,7 @@ import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
@@ -28,6 +29,7 @@ import slimeknights.tconstruct.library.Util;
 import slimeknights.tconstruct.library.book.TinkerBook;
 import slimeknights.tconstruct.library.client.CustomFontRenderer;
 import slimeknights.tconstruct.library.client.CustomTextureCreator;
+import slimeknights.tconstruct.library.client.crosshair.CrosshairRenderEvents;
 import slimeknights.tconstruct.library.client.model.MaterialModelLoader;
 import slimeknights.tconstruct.library.client.model.ModifierModelLoader;
 import slimeknights.tconstruct.library.client.model.ToolModelLoader;
@@ -35,16 +37,19 @@ import slimeknights.tconstruct.library.client.particle.EntitySlimeFx;
 import slimeknights.tconstruct.library.client.particle.Particles;
 import slimeknights.tconstruct.library.client.texture.AbstractColoredTexture;
 import slimeknights.tconstruct.library.modifiers.IModifier;
+import slimeknights.tconstruct.library.tools.IToolPart;
 import slimeknights.tconstruct.library.tools.Pattern;
+import slimeknights.tconstruct.library.tools.ToolCore;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.client.ParticleEffect;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackCleaver;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackFrypan;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackHammer;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackHatchet;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackLongsword;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackLumberAxe;
-import slimeknights.tconstruct.tools.client.particle.ParticleAttackRapier;
+import slimeknights.tconstruct.shared.client.ParticleEndspeed;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackCleaver;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackFrypan;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackHammer;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackHatchet;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackLongsword;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackLumberAxe;
+import slimeknights.tconstruct.tools.common.client.particle.ParticleAttackRapier;
 
 public abstract class ClientProxy extends CommonProxy {
 
@@ -63,7 +68,7 @@ public abstract class ClientProxy extends CommonProxy {
 
   public static void initRenderer() {
 
-    CustomTextureCreator creator = new CustomTextureCreator();
+    CustomTextureCreator creator = CustomTextureCreator.INSTANCE;
 
     MinecraftForge.EVENT_BUS.register(creator);
     ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(creator);
@@ -89,6 +94,8 @@ public abstract class ClientProxy extends CommonProxy {
       fontRenderer.setBidiFlag(Minecraft.getMinecraft().getLanguageManager().isCurrentLanguageBidirectional());
     }
     TinkerBook.INSTANCE.fontRenderer = bookRenderer;
+
+    MinecraftForge.EVENT_BUS.register(CrosshairRenderEvents.INSTANCE);
   }
 
   protected ResourceLocation registerModel(Item item, String... customVariants) {
@@ -149,15 +156,18 @@ public abstract class ClientProxy extends CommonProxy {
    * Registers a multimodel that should be loaded via our multimodel loader The model-string is obtained through the
    * game registry.
    */
-  protected ResourceLocation registerToolModel(Item item) {
-    ResourceLocation itemLocation = getItemLocation(item);
+  protected ResourceLocation registerToolModel(ToolCore tool) {
+    ResourceLocation itemLocation = getItemLocation(tool);
     if(itemLocation == null) {
       return null;
     }
 
     String path = "tools/" + itemLocation.getResourcePath() + ToolModelLoader.EXTENSION;
 
-    return registerToolModel(item, new ResourceLocation(itemLocation.getResourceDomain(), path));
+    ResourceLocation location = new ResourceLocation(itemLocation.getResourceDomain(), path);
+    ToolModelLoader.addPartMapping(location, tool);
+
+    return registerToolModel(tool, location);
   }
 
   protected ResourceLocation registerToolModel(Item item, final ResourceLocation location) {
@@ -288,6 +298,8 @@ public abstract class ClientProxy extends CommonProxy {
       // effects
       case EFFECT:
         return new ParticleEffect(data[1], world, x, y, z, xSpeed, ySpeed, zSpeed);
+      case ENDSPEED:
+        return new ParticleEndspeed(world, x, y, z, xSpeed, ySpeed, zSpeed);
     }
 
     return null;
@@ -316,6 +328,20 @@ public abstract class ClientProxy extends CommonProxy {
     explosion.doExplosionB(true);
   }
 
+  public <T extends Item & IToolPart> ResourceLocation registerPartModel(T item) {
+    ResourceLocation itemLocation = getItemLocation(item);
+    if(itemLocation == null) {
+      return null;
+    }
+
+    String path = "parts/" + itemLocation.getResourcePath() + MaterialModelLoader.EXTENSION;
+    ResourceLocation location = new ResourceLocation(itemLocation.getResourceDomain(), path);
+
+    MaterialModelLoader.addPartMapping(location, item);
+
+    return registerMaterialModel(item, location);
+  }
+
   public static class PatternMeshDefinition implements ItemMeshDefinition {
 
     private final ResourceLocation baseLocation;
@@ -337,5 +363,11 @@ public abstract class ClientProxy extends CommonProxy {
                                                             baseLocation.getResourcePath() + suffix),
                                        "inventory");
     }
+  }
+
+  @Override
+  public void updateEquippedItemForRendering(EnumHand hand) {
+    Minecraft.getMinecraft().getItemRenderer().resetEquippedProgress(hand);
+    Minecraft.getMinecraft().getItemRenderer().updateEquippedItem();
   }
 }

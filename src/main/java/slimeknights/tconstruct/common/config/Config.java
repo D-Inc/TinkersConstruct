@@ -2,7 +2,6 @@ package slimeknights.tconstruct.common.config;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
@@ -51,6 +50,7 @@ public final class Config {
   public static int slimeIslandsRate = 730; // Every x-th chunk will have a slime island. so 1 = every chunk, 100 = every 100th
   public static int magmaIslandsRate = 100; // Every x-th chunk will have a slime island. so 1 = every chunk, 100 = every 100th
   public static int[] slimeIslandBlacklist = new int[]{-1, 1};
+  public static boolean slimeIslandsOnlyGenerateInSurfaceWorlds = true;
   public static boolean genCobalt = true;
   public static int cobaltRate = 16; // max. cobalt per chunk
   public static boolean genArdite = true;
@@ -59,8 +59,10 @@ public final class Config {
   // Clientside configs
   public static boolean renderTableItems = true;
   public static boolean extraTooltips = true;
+  public static boolean listAllTables = true;
+  public static boolean listAllMaterials = true;
   public static boolean enableForgeBucketModel = true; // enables the forge bucket model by default
-
+  public static boolean dumpTextureMap = false; // requires debug module
 
   /* Config File */
 
@@ -213,6 +215,11 @@ public final class Config {
       slimeIslandBlacklist = prop.getIntList();
       propOrder.add(prop.getName());
 
+      prop = configFile.get(cat, "slimeIslandsOnlyGenerateInSurfaceWorlds", slimeIslandsOnlyGenerateInSurfaceWorlds);
+      prop.setComment("If true, slime islands wont generate in dimensions which aren't of type surface. This means they wont generate in modded cave dimensions like the deep dark.");
+      slimeIslandsOnlyGenerateInSurfaceWorlds = prop.getBoolean();
+      propOrder.add(prop.getName());
+
       // Nether ore generation
       prop = configFile.get(cat, "genCobalt", genCobalt);
       prop.setComment("If true, cobalt ore will generate in the nether");
@@ -254,6 +261,16 @@ public final class Config {
       extraTooltips = prop.getBoolean();
       propOrder.add(prop.getName());
 
+      prop = configFile.get(cat, "listAllTables", listAllTables);
+      prop.setComment("If true all variants of the different tables will be listed in creative. Set to false to only have the oak variant for all tables.");
+      listAllTables = prop.getBoolean();
+      propOrder.add(prop.getName());
+
+      prop = configFile.get(cat, "listAllMaterials", listAllMaterials);
+      prop.setComment("If true all material variants of the different parts, tools,... will be listed in creative. Set to false to only have the first found material for all items (usually wood).");
+      listAllMaterials = prop.getBoolean();
+      propOrder.add(prop.getName());
+
       prop = configFile.get(cat, "enableForgeBucketModel", enableForgeBucketModel);
       prop.setComment("If true tools will enable the forge bucket model on startup and then turn itself off. This is only there so that a fresh install gets the buckets turned on by default.");
       enableForgeBucketModel = prop.getBoolean();
@@ -266,6 +283,11 @@ public final class Config {
           ForgeModContainer.getConfig().save();
         }
       }
+      propOrder.add(prop.getName());
+
+      prop = configFile.get(cat, "dumpTextureMap", dumpTextureMap);
+      prop.setComment("REQUIRES DEBUG MODULE. Will do nothing if debug module is disabled. If true the texture map will be dumped into the run directory, just like old forge did.");
+      dumpTextureMap = prop.getBoolean();
       propOrder.add(prop.getName());
 
       ClientSide.setPropertyOrder(propOrder);

@@ -33,6 +33,7 @@ import slimeknights.tconstruct.library.Util;
 import slimeknights.tconstruct.library.events.TinkerEvent;
 import slimeknights.tconstruct.library.materials.HeadMaterialStats;
 import slimeknights.tconstruct.library.materials.Material;
+import slimeknights.tconstruct.library.materials.MaterialTypes;
 import slimeknights.tconstruct.library.modifiers.IModifier;
 import slimeknights.tconstruct.library.modifiers.ModifierNBT;
 import slimeknights.tconstruct.library.modifiers.TinkerGuiException;
@@ -42,6 +43,7 @@ import slimeknights.tconstruct.library.utils.Tags;
 import slimeknights.tconstruct.library.utils.TinkerUtil;
 import slimeknights.tconstruct.library.utils.ToolBuilder;
 import slimeknights.tconstruct.library.utils.ToolHelper;
+import slimeknights.tconstruct.library.utils.TooltipBuilder;
 
 /**
  * The base for each Tinker tool.
@@ -176,7 +178,7 @@ public abstract class TinkersItem extends Item implements ITinkerable, IModifyab
     addMaterialTraits(basetag, materials);
 
     // fire toolbuilding event
-    TinkerEvent.OnItemBuilding.fireEvent(basetag, ImmutableList.copyOf(materials));
+    TinkerEvent.OnItemBuilding.fireEvent(basetag, ImmutableList.copyOf(materials), this);
 
     return basetag;
   }
@@ -359,7 +361,7 @@ public abstract class TinkersItem extends Item implements ITinkerable, IModifyab
 
       RecipeMatch.Match match = material.matches(repairItems);
       if(match != null) {
-        HeadMaterialStats stats = material.getStats(HeadMaterialStats.TYPE);
+        HeadMaterialStats stats = material.getStats(MaterialTypes.HEAD);
         if(stats != null) {
           materialsMatched.add(material);
           durability += ((float) stats.durability * (float) match.amount * getRepairModifierForPart(index)) / 144f;
@@ -402,7 +404,7 @@ public abstract class TinkersItem extends Item implements ITinkerable, IModifyab
 
     NBTTagCompound tag = TagUtil.getExtraTag(tool);
     int repair = tag.getInteger(Tags.REPAIR_COUNT);
-    float repairDimishingReturns = (100 - repair/2) / 100f;
+    float repairDimishingReturns = (100 - repair / 2) / 100f;
     if(repairDimishingReturns < 0.5f) {
       repairDimishingReturns = 0.5f;
     }
@@ -446,19 +448,7 @@ public abstract class TinkersItem extends Item implements ITinkerable, IModifyab
   @Override
   public void getTooltip(ItemStack stack, List<String> tooltips) {
     // Default tooltip: modifiers
-    NBTTagList tagList = TagUtil.getModifiersTagList(stack);
-    for(int i = 0; i < tagList.tagCount(); i++) {
-      NBTTagCompound tag = tagList.getCompoundTagAt(i);
-      ModifierNBT data = ModifierNBT.readTag(tag);
-
-      // get matching modifier
-      IModifier modifier = TinkerRegistry.getModifier(data.identifier);
-      if(modifier == null || modifier.isHidden()) {
-        continue;
-      }
-
-      tooltips.add(data.getColorString() + modifier.getTooltip(tag, false));
-    }
+    TooltipBuilder.addModifierTooltips(stack,tooltips);
   }
 
   @Nonnull
