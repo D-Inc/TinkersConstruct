@@ -50,7 +50,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group= "slimeknights"
-archivesBaseName = "TConstruct"
+archivesBaseName = "TConstruct-Rocker545"
 
 // External properties
 ext.configFile = file "build.properties"
