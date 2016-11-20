@@ -245,7 +245,7 @@ tile.tconstruct.brownstone_stairs_creeper.name=Brownstone Creeperface Stairs
 
 # General Items
 item.tconstruct.book.name=Materials and You
-item.tconstruct.book.tooltip=The book every Tinkerer needs\nby Skyla
+item.tconstruct.book.tooltip=The book every Tinker needs\nby Skyla
 
 item.tconstruct.edible.bacon.name=Bacon
 item.tconstruct.edible.slimeball_blue.name=Slime Ball
@@ -355,8 +355,11 @@ item.tconstruct.battleaxe.name=Battleaxe
 # Ranged Weapons & Ammo
 
 item.tconstruct.shortbow.name=Shortbow
+item.tconstruct.longbow.name=Longbow
+item.tconstruct.crossbow.name=Crossbow
 
 item.tconstruct.arrow.name=Arrow
+item.tconstruct.bolt.name=Bolt
 
 item.tconstruct.shuriken.name=Shuriken
 
@@ -395,6 +398,8 @@ item.tconstruct.bow_string.name=Bowstring
 item.tconstruct.arrow_head.name=Arrow Head
 item.tconstruct.arrow_shaft.name=Arrow Shaft
 item.tconstruct.fletching.name=Fletching
+
+item.tconstruct.bolt_core.name=Bolt Core
 
 # Material specific tools and toolparts
 # item.tconstruct.<tool>.<material>
@@ -577,6 +582,8 @@ stat.bow.drawspeed.name=Drawspeed
 stat.bow.drawspeed.desc=How fast you can draw the bow.
 stat.bow.range.name=Range Multiplier
 stat.bow.range.desc=How far the projectile can be propelled.
+stat.bow.damage.name=Bonus Damage
+stat.bow.damage.desc=Bonus damage dealt on hit.\nThe force of the arrow.
 
 stat.bowstring.name=Bowstring
 stat.bowstring.modifier.name=Modifier
@@ -594,6 +601,7 @@ stat.fletching.accuracy.desc=How stable the flight path will be using this fletc
 stat.fletching.modifier.name=Modifier
 stat.fletching.modifier.desc=How many arrows you can craft with this.\nProjectile ammo will be multiplied by this.
 
+stat.projectile.name=Projectile
 stat.projectile.ammo.name=Ammo
 
 ##############
@@ -804,7 +812,9 @@ tooltip.part.missing_info=Part has no data
 
 tooltip.pattern.cost=Material Cost: %d
 
-tooltip.chest.has_items=Contains items
+tooltip.chest.has_items=Contains %d item(s)
+tooltip.patternchest.holds_patterns=Contains %d pattern(s)
+tooltip.patternchest.holds_casts=Contains %d cast(s)
 
 tooltip.tank.fluid=%s
 tooltip.tank.amount=%d mb

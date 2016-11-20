@@ -1,18 +1,23 @@
 package slimeknights.tconstruct.tools;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 
 import slimeknights.tconstruct.common.ClientProxy;
-import slimeknights.tconstruct.library.TinkerRegistryClient;
+import slimeknights.tconstruct.common.ModelRegisterUtil;
+import slimeknights.tconstruct.library.Util;
 import slimeknights.tconstruct.library.client.CustomTextureCreator;
-import slimeknights.tconstruct.library.client.ToolBuildGuiInfo;
+import slimeknights.tconstruct.library.client.model.ToolModelLoader;
 import slimeknights.tconstruct.tools.common.block.BlockToolTable;
 import slimeknights.tconstruct.tools.common.client.RenderEvents;
+import slimeknights.tconstruct.tools.ranged.item.BoltCore;
 
 import static slimeknights.tconstruct.tools.TinkerTools.shard;
 import static slimeknights.tconstruct.tools.TinkerTools.sharpeningKit;
@@ -48,8 +53,23 @@ public class ToolClientProxy extends ClientProxy {
     ModelLoader.setCustomMeshDefinition(TinkerTools.pattern, new PatternMeshDefinition(patternLoc));
 
     // parts
-    registerPartModel(shard);
-    registerPartModel(sharpeningKit);
+    ModelRegisterUtil.registerPartModel(shard);
+    ModelRegisterUtil.registerPartModel(sharpeningKit);
+
+    // custom handling for the bolts because of GUI stuff
+    final ModelResourceLocation boltCoreModelLocation = Util.getModelResource("parts/bolt_core" + ToolModelLoader.EXTENSION, ModelRegisterUtil.VARIANT_INVENTORY);
+    final ModelResourceLocation boltCoreGuiModelLocation = Util.getModelResource("parts/bolt_core_gui", ModelRegisterUtil.VARIANT_INVENTORY);
+
+    ModelLoader.setCustomMeshDefinition(TinkerTools.boltCore, stack -> {
+      if(stack == BoltCore.GUI_RENDER_ITEMSTACK) {
+        return boltCoreGuiModelLocation;
+      }
+
+      return boltCoreModelLocation;
+    });
+
+    ModelLoader.registerItemVariants(TinkerTools.boltCore, boltCoreGuiModelLocation);
+    ModelLoader.registerItemVariants(TinkerTools.boltCore, boltCoreModelLocation);
   }
 
 

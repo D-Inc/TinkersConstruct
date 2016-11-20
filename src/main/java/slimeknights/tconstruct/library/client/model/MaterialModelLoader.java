@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.LoaderState;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -35,6 +36,10 @@ public class MaterialModelLoader implements ICustomModelLoader {
     }
 
     partTextureRestriction.get(resourceLocation).add(toolPart);
+  }
+
+  public static Optional<ResourceLocation> getToolPartModelLocation(IToolPart toolPart) {
+    return partTextureRestriction.entrySet().stream().filter(entry -> entry.getValue().contains(toolPart)).findFirst().map(Map.Entry::getKey);
   }
 
   @Override
@@ -70,6 +75,7 @@ public class MaterialModelLoader implements ICustomModelLoader {
       return model;
     } catch(IOException e) {
       TinkerRegistry.log.error("Could not load material model {}", modelLocation.toString());
+      TinkerRegistry.log.debug(e);
     }
     return ModelLoaderRegistry.getMissingModel();
   }

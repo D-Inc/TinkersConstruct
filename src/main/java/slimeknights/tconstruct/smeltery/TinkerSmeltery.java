@@ -402,7 +402,7 @@ public class TinkerSmeltery extends TinkerPulse {
     int bucket = Fluid.BUCKET_VOLUME;
 
     // bucket casting
-    TinkerRegistry.registerTableCasting(new BucketCastingRecipe());
+    TinkerRegistry.registerTableCasting(BucketCastingRecipe.INSTANCE);
 
     // Water
     Fluid water = FluidRegistry.WATER;
@@ -447,9 +447,11 @@ public class TinkerSmeltery extends TinkerPulse {
 
     // register stone toolpart melting
     for(IToolPart toolPart : TinkerRegistry.getToolParts()) {
-      if(toolPart instanceof MaterialItem) {
-        ItemStack stack = toolPart.getItemstackWithMaterial(TinkerMaterials.stone);
-        TinkerRegistry.registerMelting(stack, TinkerFluids.searedStone, toolPart.getCost());
+      if(toolPart.canBeCasted()) {
+        if(toolPart instanceof MaterialItem) {
+          ItemStack stack = toolPart.getItemstackWithMaterial(TinkerMaterials.stone);
+          TinkerRegistry.registerMelting(stack, TinkerFluids.searedStone, toolPart.getCost());
+        }
       }
     }
 
@@ -617,6 +619,9 @@ public class TinkerSmeltery extends TinkerPulse {
     // melt ALL the toolparts n stuff. Also cast them.
     Fluid fluid = material.getFluid();
     for(IToolPart toolPart : TinkerRegistry.getToolParts()) {
+      if(!toolPart.canBeCasted()) {
+        continue;
+      }
       if(toolPart instanceof MaterialItem) {
         ItemStack stack = toolPart.getItemstackWithMaterial(material);
         ItemStack cast = new ItemStack(TinkerSmeltery.cast);

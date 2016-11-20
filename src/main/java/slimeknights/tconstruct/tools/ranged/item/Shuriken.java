@@ -26,12 +26,17 @@ import slimeknights.tconstruct.tools.common.entity.EntityShuriken;
 
 public class Shuriken extends ProjectileCore {
 
-  private static PartMaterialType shurikenPMT = new PartMaterialType(TinkerTools.knifeBlade, MaterialTypes.HEAD, MaterialTypes.EXTRA);
+  private static PartMaterialType shurikenPMT = new PartMaterialType(TinkerTools.knifeBlade, MaterialTypes.HEAD, MaterialTypes.EXTRA, MaterialTypes.PROJECTILE);
 
   public Shuriken() {
     super(shurikenPMT, shurikenPMT, shurikenPMT, shurikenPMT);
 
     addCategory(Category.NO_MELEE, Category.PROJECTILE);
+  }
+
+  @Override
+  public int[] getRepairParts() {
+    return new int[]{0, 1, 2, 3};
   }
 
   @Override
@@ -49,7 +54,7 @@ public class Shuriken extends ProjectileCore {
 
     if(!worldIn.isRemote) {
       boolean usedAmmo = useAmmo(itemStackIn, playerIn);
-      EntityProjectileBase projectile = getProjectile(itemStackIn, itemStackIn, worldIn, playerIn, 2.1f, 0f, usedAmmo);
+      EntityProjectileBase projectile = getProjectile(itemStackIn, itemStackIn, worldIn, playerIn, 2.1f, 0f, 1f, usedAmmo);
       worldIn.spawnEntityInWorld(projectile);
     }
 
@@ -59,25 +64,24 @@ public class Shuriken extends ProjectileCore {
   @Override
   public ProjectileNBT buildTagData(List<Material> materials) {
     ProjectileNBT data = new ProjectileNBT();
-    data.head((HeadMaterialStats) materials.get(0).getStatsOrUnknown(MaterialTypes.HEAD),
-              (HeadMaterialStats) materials.get(1).getStatsOrUnknown(MaterialTypes.HEAD),
-              (HeadMaterialStats) materials.get(2).getStatsOrUnknown(MaterialTypes.HEAD),
-              (HeadMaterialStats) materials.get(3).getStatsOrUnknown(MaterialTypes.HEAD));
+    data.head(materials.get(0).getStatsOrUnknown(MaterialTypes.HEAD),
+              materials.get(1).getStatsOrUnknown(MaterialTypes.HEAD),
+              materials.get(2).getStatsOrUnknown(MaterialTypes.HEAD),
+              materials.get(3).getStatsOrUnknown(MaterialTypes.HEAD));
 
-    data.extra((ExtraMaterialStats) materials.get(0).getStatsOrUnknown(MaterialTypes.EXTRA),
-               (ExtraMaterialStats) materials.get(1).getStatsOrUnknown(MaterialTypes.EXTRA),
-               (ExtraMaterialStats) materials.get(2).getStatsOrUnknown(MaterialTypes.EXTRA),
-               (ExtraMaterialStats) materials.get(3).getStatsOrUnknown(MaterialTypes.EXTRA));
+    data.extra(materials.get(0).getStatsOrUnknown(MaterialTypes.EXTRA),
+               materials.get(1).getStatsOrUnknown(MaterialTypes.EXTRA),
+               materials.get(2).getStatsOrUnknown(MaterialTypes.EXTRA),
+               materials.get(3).getStatsOrUnknown(MaterialTypes.EXTRA));
 
     data.attack += 1f;
     data.accuracy = 1f;
-    //data.durability = Math.max(1, Math.round((float) data.durability / 10f));
 
     return data;
   }
 
   @Override
-  public EntityProjectileBase getProjectile(ItemStack stack, ItemStack launcher, World world, EntityPlayer player, float speed, float inaccuracy, boolean usedAmmo) {
+  public EntityProjectileBase getProjectile(ItemStack stack, ItemStack launcher, World world, EntityPlayer player, float speed, float inaccuracy, float progress, boolean usedAmmo) {
     inaccuracy *= ProjectileNBT.from(stack).accuracy;
     return new EntityShuriken(world, player, speed, inaccuracy, getProjectileStack(stack, world, player, usedAmmo), launcher);
   }

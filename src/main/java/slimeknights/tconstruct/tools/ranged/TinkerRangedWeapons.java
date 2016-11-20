@@ -20,8 +20,12 @@ import slimeknights.tconstruct.library.tools.ToolCore;
 import slimeknights.tconstruct.tools.AbstractToolPulse;
 import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.tools.common.entity.EntityArrow;
+import slimeknights.tconstruct.tools.common.entity.EntityBolt;
 import slimeknights.tconstruct.tools.common.entity.EntityShuriken;
 import slimeknights.tconstruct.tools.ranged.item.Arrow;
+import slimeknights.tconstruct.tools.ranged.item.Bolt;
+import slimeknights.tconstruct.tools.ranged.item.CrossBow;
+import slimeknights.tconstruct.tools.ranged.item.LongBow;
 import slimeknights.tconstruct.tools.ranged.item.ShortBow;
 import slimeknights.tconstruct.tools.ranged.item.Shuriken;
 
@@ -39,8 +43,12 @@ public class TinkerRangedWeapons extends AbstractToolPulse {
   public static CommonProxy proxy;
 
   public static ShortBow shortBow;
+  public static LongBow longBow;
+
+  public static CrossBow crossBow;
 
   public static Arrow arrow;
+  public static Bolt bolt;
 
   public static ToolCore shuriken;
 
@@ -51,7 +59,8 @@ public class TinkerRangedWeapons extends AbstractToolPulse {
     super.preInit(event);
 
     // entities
-    //EntityRegistry.registerModEntity(EntityArrow.class, "arrow", EntityIDs.ARROW, TConstruct.instance, 64, 1, false);
+    EntityRegistry.registerModEntity(EntityArrow.class, "arrow", EntityIDs.ARROW, TConstruct.instance, 64, 1, false);
+    EntityRegistry.registerModEntity(EntityBolt.class, "bolt", EntityIDs.BOLT, TConstruct.instance, 64, 1, false);
     EntityRegistry.registerModEntity(EntityShuriken.class, "shuriken", EntityIDs.SHURIKEN, TConstruct.instance, 64, 1, false);
 
     proxy.preInit();
@@ -59,9 +68,13 @@ public class TinkerRangedWeapons extends AbstractToolPulse {
 
   @Override
   protected void registerTools() {
-    //shortBow = registerTool(new ShortBow(), "shortbow");
+    shortBow = registerTool(new ShortBow(), "shortbow");
+    longBow = registerTool(new LongBow(), "longbow");
 
-    //arrow = registerTool(new Arrow(), "arrow");
+    crossBow = registerTool(new CrossBow(), "crossbow");
+
+    arrow = registerTool(new Arrow(), "arrow");
+    bolt = registerTool(new Bolt(), "bolt");
 
     shuriken = registerTool(new Shuriken(), "shuriken");
   }
@@ -76,9 +89,14 @@ public class TinkerRangedWeapons extends AbstractToolPulse {
 
   @Override
   protected void registerToolBuilding() {
-    //TinkerRegistry.registerToolCrafting(shortBow);
+    TinkerRegistry.registerToolCrafting(shortBow);
+    TinkerRegistry.registerToolForgeCrafting(longBow);
 
-    //TinkerRegistry.registerToolCrafting(arrow);
+    TinkerRegistry.registerToolCrafting(arrow);
+
+    TinkerRegistry.registerToolForgeCrafting(crossBow);
+
+    TinkerRegistry.registerToolForgeCrafting(bolt);
 
     TinkerRegistry.registerToolForgeCrafting(shuriken);
   }
@@ -88,6 +106,8 @@ public class TinkerRangedWeapons extends AbstractToolPulse {
   @Override
   public void postInit(FMLPostInitializationEvent event) {
     super.postInit(event);
+
+    TinkerRegistry.registerTableCasting(BoltCoreCastingRecipe.INSTANCE);
   }
 
 }

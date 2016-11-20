@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.tools;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -74,11 +75,6 @@ public class ToolPart extends MaterialItem implements IToolPart {
     return false;
   }
 
-  @Override
-  public ItemStack getItemstackWithMaterial(Material material) {
-    return super.getItemstackWithMaterial(material);
-  }
-
   @SideOnly(Side.CLIENT)
   @Override
   public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
@@ -99,23 +95,11 @@ public class ToolPart extends MaterialItem implements IToolPart {
         tooltip.add(Util.translate("tooltip.tool.holdShift"));
       }
       else {
-        for(IMaterialStats stat : material.getAllStats()) {
-          if(hasUseForStat(stat.getIdentifier())) {
-            List<String> text = stat.getLocalizedInfo();
-            if(!text.isEmpty()) {
-              tooltip.add("");
-              tooltip.add(TextFormatting.WHITE.toString() + TextFormatting.UNDERLINE + stat.getLocalizedName());
-              tooltip.addAll(stat.getLocalizedInfo());
-            }
-          }
-        }
+        tooltip.addAll(getTooltipStatsInfo(material));
       }
     }
 
-    String materialInfo = I18n.translateToLocalFormatted("tooltip.part.material_added_by",
-                                                         TinkerRegistry.getTrace(material).getName());
-    tooltip.add("");
-    tooltip.add(materialInfo);
+    tooltip.addAll(getAddedByInfo(material));
   }
 
   public List<String> getTooltipTraitInfo(Material material) {
@@ -173,6 +157,34 @@ public class ToolPart extends MaterialItem implements IToolPart {
     }
 
     return tooltips;
+  }
+
+  public List<String> getTooltipStatsInfo(Material material) {
+    ImmutableList.Builder<String> builder = ImmutableList.builder();
+
+    for(IMaterialStats stat : material.getAllStats()) {
+      if(hasUseForStat(stat.getIdentifier())) {
+        List<String> text = stat.getLocalizedInfo();
+        if(!text.isEmpty()) {
+          builder.add("");
+          builder.add(TextFormatting.WHITE.toString() + TextFormatting.UNDERLINE + stat.getLocalizedName());
+          builder.addAll(stat.getLocalizedInfo());
+        }
+      }
+    }
+
+    return builder.build();
+  }
+
+  public List<String> getAddedByInfo(Material material) {
+    ImmutableList.Builder<String> builder = ImmutableList.builder();
+    if(TinkerRegistry.getTrace(material) != null) {
+      String materialInfo = I18n.translateToLocalFormatted("tooltip.part.material_added_by",
+                                                           TinkerRegistry.getTrace(material).getName());
+      builder.add("");
+      builder.add(materialInfo);
+    }
+    return builder.build();
   }
 
   @Nonnull

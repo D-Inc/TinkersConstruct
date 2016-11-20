@@ -34,6 +34,7 @@ import slimeknights.tconstruct.library.capability.projectile.CapabilityTinkerPro
 import slimeknights.tconstruct.library.utils.HarvestLevels;
 import slimeknights.tconstruct.plugin.ChiselAndBits;
 import slimeknights.tconstruct.plugin.CraftingTweaks;
+import slimeknights.tconstruct.plugin.theoneprobe.TheOneProbe;
 import slimeknights.tconstruct.plugin.waila.Waila;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.TinkerFluids;
@@ -104,6 +105,7 @@ public class TConstruct {
     pulseManager.registerPulse(new ChiselAndBits());
     pulseManager.registerPulse(new CraftingTweaks());
     pulseManager.registerPulse(new Waila());
+    pulseManager.registerPulse(new TheOneProbe());
 
     pulseManager.registerPulse(new TinkerDebug());
   }
@@ -149,7 +151,9 @@ public class TConstruct {
 
   @Mod.EventHandler
   public void init(FMLInitializationEvent event) {
-
+    if(event.getSide().isClient()) {
+      ClientProxy.initRenderMaterials();
+    }
   }
 
   @Mod.EventHandler

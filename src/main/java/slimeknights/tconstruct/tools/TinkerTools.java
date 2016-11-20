@@ -52,6 +52,7 @@ import slimeknights.tconstruct.tools.common.tileentity.TilePatternChest;
 import slimeknights.tconstruct.tools.common.tileentity.TileStencilTable;
 import slimeknights.tconstruct.tools.common.tileentity.TileToolForge;
 import slimeknights.tconstruct.tools.common.tileentity.TileToolStation;
+import slimeknights.tconstruct.tools.ranged.item.BoltCore;
 
 @Pulse(id = TinkerTools.PulseId, description = "All the tools and everything related to it.")
 public class TinkerTools extends AbstractToolPulse {
@@ -101,6 +102,7 @@ public class TinkerTools extends AbstractToolPulse {
   public static ToolPart arrowHead;
   public static ToolPart arrowShaft;
   public static ToolPart fletching;
+  public static BoltCore boltCore;
 
   // PRE-INITIALIZATION
   @Override
@@ -113,6 +115,7 @@ public class TinkerTools extends AbstractToolPulse {
     sharpeningKit = (SharpeningKit) registerToolPart(new SharpeningKit(), "sharpening_kit");
     sharpeningKit.setCreativeTab(TinkerRegistry.tabParts);
     TinkerRegistry.registerToolPart(sharpeningKit);
+    TinkerRegistry.registerToolPart(shard);
 
     super.preInit(event);
 
@@ -141,6 +144,7 @@ public class TinkerTools extends AbstractToolPulse {
     TinkerRegistry.setShardItem(shard);
 
     TinkerRegistry.registerStencilTableCrafting(Pattern.setTagForPart(new ItemStack(pattern), sharpeningKit));
+    TinkerRegistry.registerStencilTableCrafting(Pattern.setTagForPart(new ItemStack(pattern), shard));
   }
 
   @Override
@@ -176,7 +180,9 @@ public class TinkerTools extends AbstractToolPulse {
 
     arrowHead = registerToolPart(new ToolPart(Material.VALUE_Ingot * 2), "arrow_head");
     arrowShaft = registerToolPart(new ToolPart(Material.VALUE_Ingot * 2), "arrow_shaft");
-    fletching = registerToolPart(new ToolPart(Material.VALUE_Ingot), "fletching");
+    fletching = registerToolPart(new ToolPart(Material.VALUE_Ingot * 2), "fletching");
+    boltCore = (BoltCore)registerToolPart(new BoltCore(Material.VALUE_Ingot * 2), "bolt_core", null);
+    toolparts.remove(boltCore);
   }
 
   // INITIALIZATION

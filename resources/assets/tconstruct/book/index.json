@@ -10,6 +10,16 @@
     }
   },
   {
+    "name": "tools",
+    "data": "sections/tools.json",
+    "icon": {
+      "item": {
+        "id": "minecraft:iron_pickaxe",
+        "damage": 0
+      }
+    }
+  },
+  {
     "name": "materials",
     "icon": {
       "item": {
@@ -50,6 +60,14 @@
     "icon": {
       "item": {
         "id": "tconstruct:tinker_tank_controller"
+      }
+    }
+  },
+  {
+    "name": "bowmaterials",
+    "icon": {
+      "item": {
+        "id": "minecraft:bow"
       }
     }
   }

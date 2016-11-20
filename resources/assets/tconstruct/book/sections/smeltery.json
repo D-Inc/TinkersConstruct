@@ -5,8 +5,16 @@
     "data": "smeltery/intro.json"
   },
   {
-    "name": "structure",
+    "name": "info",
     "type": "text",
     "data": "smeltery/structure.json"
+  },
+  {
+    "name": "structure",
+    "type": "structure",
+    "data": "smeltery/multiblock.json"
+  },
+  {
+    "type": "blank"
   }
 ]
