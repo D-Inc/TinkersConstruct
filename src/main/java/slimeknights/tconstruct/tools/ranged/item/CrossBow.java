@@ -3,6 +3,7 @@ package slimeknights.tconstruct.tools.ranged.item;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -24,7 +25,6 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import slimeknights.tconstruct.common.ClientProxy;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.library.client.BooleanItemPropertyGetter;
 import slimeknights.tconstruct.library.client.crosshair.Crosshairs;
@@ -53,7 +53,7 @@ public class CrossBow extends BowCore implements ICustomCrosshairUser {
   protected static final ResourceLocation PROPERTY_IS_LOADED = new ResourceLocation("loaded");
 
   public CrossBow() {
-    super(PartMaterialType.handle(TinkerTools.toughToolRod),
+    super(PartMaterialType.crossbow(TinkerTools.toughToolRod),
           PartMaterialType.bow(TinkerTools.bowLimb),
           PartMaterialType.extra(TinkerTools.toughBinding),
           PartMaterialType.bowstring(TinkerTools.bowString));
@@ -113,6 +113,14 @@ public class CrossBow extends BowCore implements ICustomCrosshairUser {
     stack.setTagCompound(tag);
   }
 
+  @Override
+  public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+    // has to be done in onUpdate because onTickUsing is too early and gets overwritten. bleh.
+    preventSlowDown(entityIn, 0.195f);
+
+    super.onUpdate(stack, worldIn, entityIn, itemSlot, isSelected);
+  }
+
   @Nonnull
   @Override
   public EnumAction getItemUseAction(ItemStack stack) {
@@ -156,24 +164,25 @@ public class CrossBow extends BowCore implements ICustomCrosshairUser {
     return super.getAmmoToRender(weapon, player);
   }
 
-  private ImmutableList<Item> arrowMatches = null;
+  private ImmutableList<Item> boltMatches = null;
 
   @Override
   protected List<Item> getAmmoItems() {
-    if(arrowMatches == null) {
+    if(boltMatches == null) {
       ImmutableList.Builder<Item> builder = ImmutableList.builder();
       if(TinkerRangedWeapons.bolt != null) {
         builder.add(TinkerRangedWeapons.bolt);
       }
-      arrowMatches = builder.build();
+      boltMatches = builder.build();
     }
-    return arrowMatches;
+    return boltMatches;
   }
 
   @Override
   public ProjectileLauncherNBT buildTagData(List<Material> materials) {
     ProjectileLauncherNBT data = new ProjectileLauncherNBT();
     HandleMaterialStats body = materials.get(0).getStatsOrUnknown(MaterialTypes.HANDLE);
+    ExtraMaterialStats bodyExtra = materials.get(0).getStatsOrUnknown(MaterialTypes.EXTRA);
     HeadMaterialStats head = materials.get(1).getStatsOrUnknown(MaterialTypes.HEAD);
     BowMaterialStats limb = materials.get(1).getStatsOrUnknown(MaterialTypes.BOW);
     ExtraMaterialStats binding = materials.get(2).getStatsOrUnknown(MaterialTypes.EXTRA);
@@ -182,7 +191,7 @@ public class CrossBow extends BowCore implements ICustomCrosshairUser {
 
     data.head(head);
     data.limb(limb);
-    data.extra(binding);
+    data.extra(binding, bodyExtra);
     data.handle(body);
     data.bowstring(bowstring);
 

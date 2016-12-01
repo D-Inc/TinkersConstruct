@@ -34,8 +34,11 @@ public class ListValidModifiers extends CommandBase {
 
       sender.addChatMessage(new TextComponentString(item.getDisplayName() + " accepts the following modifiers:"));
       for(IModifier mod : TinkerRegistry.getAllModifiers()) {
+        if(!mod.hasItemsToApplyWith()) {
+          continue;
+        }
         try {
-          if((mod instanceof ModifierTrait || !(mod instanceof AbstractTrait)) && mod.canApply(item.copy(), item) && (mod.getIdentifier() == "fortified" || !(mod instanceof ModFortify))) {
+          if((mod instanceof ModifierTrait || !(mod instanceof AbstractTrait)) && mod.canApply(item.copy(), item) && (mod.getIdentifier().equals("fortified") || !(mod instanceof ModFortify))) {
             sender.addChatMessage(new TextComponentString("* " + mod.getIdentifier()));
           }
         }

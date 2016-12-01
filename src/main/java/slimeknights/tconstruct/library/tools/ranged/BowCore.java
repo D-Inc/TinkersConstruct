@@ -98,7 +98,7 @@ public abstract class BowCore extends ProjectileLauncherCore implements IAmmoUse
     return 20;
   }
 
-  protected float getDrawbackProgress(ItemStack itemstack, EntityLivingBase entityIn) {
+  public float getDrawbackProgress(ItemStack itemstack, EntityLivingBase entityIn) {
     if(itemstack != null && itemstack.getItem() == BowCore.this) {
       int timePassed = itemstack.getMaxItemUseDuration() - entityIn.getItemInUseCount();
       return getDrawbackProgress(itemstack, timePassed);
@@ -186,14 +186,14 @@ public abstract class BowCore extends ProjectileLauncherCore implements IAmmoUse
     power *= ProjectileLauncherNBT.from(bow).range;
 
     if(!worldIn.isRemote) {
-      TinkerToolEvent.OnBowShoot event = TinkerToolEvent.OnBowShoot.fireEvent(bow, ammo, player, useTime);
+      TinkerToolEvent.OnBowShoot event = TinkerToolEvent.OnBowShoot.fireEvent(bow, ammo, player, useTime, baseInaccuracy());
 
       for(int i = 0; i < event.projectileCount; i++) {
         boolean usedAmmo = false;
         if(i == 0 || event.consumeAmmoPerProjectile) {
           usedAmmo = consumeAmmo(ammo, player);
         }
-        float inaccuracy = baseInaccuracy();
+        float inaccuracy = event.getBaseInaccuracy();
         if(i > 0) {
           inaccuracy += event.bonusInaccuracy;
         }

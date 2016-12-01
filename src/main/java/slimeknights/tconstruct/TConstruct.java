@@ -59,8 +59,8 @@ import slimeknights.tconstruct.world.TinkerWorld;
     name = TConstruct.modName,
     version = TConstruct.modVersion,
     guiFactory = "slimeknights.tconstruct.common.config.ConfigGui$ConfigGuiFactory",
-    dependencies = "required-after:Forge@[12.18.1.2073,);"
-                   + "required-after:mantle@[1.10.2-1.0.0,)",
+    dependencies = "required-after:Forge@[12.18.2.2115,);"
+                   + "required-after:mantle@[1.10.2-1.1.2,);",
     acceptedMinecraftVersions = "[1.10.2, 1.11)")
 public class TConstruct {
 

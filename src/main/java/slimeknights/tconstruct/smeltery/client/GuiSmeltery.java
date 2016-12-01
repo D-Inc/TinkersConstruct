@@ -2,6 +2,8 @@ package slimeknights.tconstruct.smeltery.client;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.FluidStack;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import slimeknights.tconstruct.smeltery.inventory.ContainerSmeltery;
 import slimeknights.tconstruct.smeltery.tileentity.TileSmeltery;
 import slimeknights.tconstruct.tools.common.inventory.ContainerSideInventory;
 
-public class GuiSmeltery extends GuiHeatingStructureFuelTank {
+public class GuiSmeltery extends GuiHeatingStructureFuelTank implements IGuiLiquidTank {
 
   public static final ResourceLocation BACKGROUND = Util.getResource("textures/gui/smeltery.png");
 
@@ -60,7 +62,7 @@ public class GuiSmeltery extends GuiHeatingStructureFuelTank {
     mouseY -= cornerY;
 
     // Liquids
-    List<String> tooltip = GuiUtil.drawTankTooltip(smeltery.getTank(), mouseX, mouseY, 8, 16, 60, 68);
+    List<String> tooltip = GuiUtil.getTankTooltip(smeltery.getTank(), mouseX, mouseY, 8, 16, 60, 68);
     if(tooltip != null) {
       this.drawHoveringText(tooltip, mouseX, mouseY);
     }
@@ -91,6 +93,11 @@ public class GuiSmeltery extends GuiHeatingStructureFuelTank {
       GuiUtil.handleTankClick(smeltery.getTank(), mouseX - cornerX, mouseY - cornerY, 8, 16, 60, 68);
     }
     super.mouseClicked(mouseX, mouseY, mouseButton);
+  }
+
+  @Override
+  public FluidStack getFluidStackAtPosition(int mouseX, int mouseY) {
+    return GuiUtil.getFluidStackAtPosition(smeltery.getTank(), mouseX - cornerX, mouseY - cornerY, 8, 16, 60, 68);
   }
 
 }
