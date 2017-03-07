@@ -112,8 +112,12 @@ public abstract class ClientProxy extends CommonProxy {
       Stream.of(RenderMaterialString)
     ).forEach(TinkerRegistry::addMaterial);
 
-    TinkerRegistry.tabTools.setDisplayIcon(TinkerHarvestTools.pickaxe.buildItemForRendering(ImmutableList.of(RenderMaterials[0], RenderMaterials[1], RenderMaterials[2])));
-    TinkerRegistry.tabParts.setDisplayIcon(TinkerTools.pickHead.getItemstackWithMaterial(RenderMaterials[2]));
+    if(TinkerHarvestTools.pickaxe != null) {
+      TinkerRegistry.tabTools.setDisplayIcon(TinkerHarvestTools.pickaxe.buildItemForRendering(ImmutableList.of(RenderMaterials[0], RenderMaterials[1], RenderMaterials[2])));
+    }
+    if(TinkerTools.pickHead != null) {
+      TinkerRegistry.tabParts.setDisplayIcon(TinkerTools.pickHead.getItemstackWithMaterial(RenderMaterials[2]));
+    }
   }
 
   public static void initRenderer() {
@@ -209,7 +213,7 @@ public abstract class ClientProxy extends CommonProxy {
   @Override
   public void spawnParticle(Particles particleType, World world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, int... data) {
     if(world == null) {
-      world = mc.theWorld;
+      world = mc.world;
     }
     Particle effect = createParticle(particleType, world, x, y, z, xSpeed, ySpeed, zSpeed, data);
     mc.effectRenderer.addEffect(effect);

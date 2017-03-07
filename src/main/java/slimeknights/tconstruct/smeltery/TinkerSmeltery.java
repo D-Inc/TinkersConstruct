@@ -450,7 +450,7 @@ public class TinkerSmeltery extends TinkerPulse {
       if(toolPart.canBeCasted()) {
         if(toolPart instanceof MaterialItem) {
           ItemStack stack = toolPart.getItemstackWithMaterial(TinkerMaterials.stone);
-          TinkerRegistry.registerMelting(stack, TinkerFluids.searedStone, toolPart.getCost());
+          TinkerRegistry.registerMelting(stack, TinkerFluids.searedStone, (toolPart.getCost() * Material.VALUE_SearedMaterial) / Material.VALUE_Ingot);
         }
       }
     }
@@ -462,7 +462,7 @@ public class TinkerSmeltery extends TinkerPulse {
     TinkerRegistry.registerBasinCasting(blockSeared, null, TinkerFluids.searedStone, Material.VALUE_SearedBlock);
 
     ItemStack searedCobble = new ItemStack(searedBlock, 1, BlockSeared.SearedType.COBBLE.getMeta());
-    TinkerRegistry.registerBasinCasting(new CastingRecipe(searedCobble, RecipeMatch.of("cobblestone"), TinkerFluids.searedStone, Material.VALUE_SearedBlock - Material.VALUE_SearedMaterial));
+    TinkerRegistry.registerBasinCasting(new CastingRecipe(searedCobble, RecipeMatch.of("cobblestone"), TinkerFluids.searedStone, Material.VALUE_SearedBlock - Material.VALUE_SearedMaterial, true, false));
 
     // seared furnaces have an additional recipe above using a crafting table, to allow creation without a smeltery
     // this one is convenience for those with one

@@ -16,7 +16,6 @@ import slimeknights.mantle.multiblock.IServantLogic;
 import slimeknights.mantle.tileentity.TileInventory;
 import slimeknights.tconstruct.library.utils.TagUtil;
 import slimeknights.tconstruct.smeltery.block.BlockMultiblockController;
-import slimeknights.tconstruct.smeltery.block.BlockTinkerTankController;
 import slimeknights.tconstruct.smeltery.multiblock.MultiblockDetection;
 
 public abstract class TileMultiblock<T extends MultiblockDetection> extends TileInventory implements IMasterLogic {
@@ -66,14 +65,14 @@ public abstract class TileMultiblock<T extends MultiblockDetection> extends Tile
   public void checkMultiblockStructure() {
     boolean wasActive = active;
 
-    IBlockState state = this.worldObj.getBlockState(getPos());
+    IBlockState state = this.getWorld().getBlockState(getPos());
     if(!(state.getBlock() instanceof BlockMultiblockController)) {
       active = false;
     }
     else {
       EnumFacing in = state.getValue(BlockMultiblockController.FACING).getOpposite();
 
-      MultiblockDetection.MultiblockStructure structure = multiblock.detectMultiblock(this.worldObj, this.getPos().offset(in), MAX_SIZE);
+      MultiblockDetection.MultiblockStructure structure = multiblock.detectMultiblock(this.getWorld(), this.getPos().offset(in), MAX_SIZE);
       if(structure == null) {
         active = false;
         updateStructureInfoInternal(null);
@@ -81,19 +80,19 @@ public abstract class TileMultiblock<T extends MultiblockDetection> extends Tile
       else {
         // we found a valid tank. booyah!
         active = true;
-        MultiblockDetection.assignMultiBlock(this.worldObj, this.getPos(), structure.blocks);
+        MultiblockDetection.assignMultiBlock(this.getWorld(), this.getPos(), structure.blocks);
         updateStructureInfoInternal(structure);
         // we still have to update since something caused us to rebuild our stats
         // might be the tank size changed
         if(wasActive) {
-          worldObj.notifyBlockUpdate(getPos(), state, state, 3);
+          this.getWorld().notifyBlockUpdate(getPos(), state, state, 3);
         }
       }
     }
 
     // mark the block for updating so the controller block updates its graphics
     if(wasActive != active) {
-      worldObj.notifyBlockUpdate(getPos(), state, state, 3);
+      this.getWorld().notifyBlockUpdate(getPos(), state, state, 3);
       this.markDirty();
     }
   }
@@ -184,5 +183,15 @@ public abstract class TileMultiblock<T extends MultiblockDetection> extends Tile
   public NBTTagCompound getUpdateTag() {
     // new tag instead of super since default implementation calls the super of writeToNBT
     return writeToNBT(new NBTTagCompound());
+  }
+
+  /** Returns true if it's a client world, false if no world or server */
+  public boolean isClientWorld() {
+    return this.getWorld() != null && this.getWorld().isRemote;
+  }
+
+  /** Returns true if it's a server world, false if no world or client */
+  public boolean isServerWorld() {
+    return this.getWorld() != null && !this.getWorld().isRemote;
   }
 }

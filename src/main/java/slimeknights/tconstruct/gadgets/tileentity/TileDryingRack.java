@@ -17,6 +17,9 @@ import slimeknights.tconstruct.library.tileentity.IProgress;
 
 public class TileDryingRack extends TileItemRack implements ITickable, ISidedInventory, IProgress {
 
+  private static final String TAG_TIME = "Time";
+  private static final String TAG_MAXTIME = "MaxTime";
+
   int currentTime;
   int maxTime;
 
@@ -24,7 +27,7 @@ public class TileDryingRack extends TileItemRack implements ITickable, ISidedInv
     super("gui.dryingrack.name", 2); // two slots, an input and an output. Should never both have something, output is just to stop item tranfer
 
     // use a SidedInventory Wrapper to respect the canInsert/Extract calls
-    this.itemHandler = new SidedInvWrapper(this, null);
+    this.itemHandler = new SidedInvWrapper(this, EnumFacing.DOWN);
   }
 
   @Override
@@ -40,14 +43,14 @@ public class TileDryingRack extends TileItemRack implements ITickable, ISidedInv
     //only run on the server side and if a recipe is available
     if(maxTime > 0 && currentTime < maxTime) {
       currentTime++;
-      if(currentTime >= maxTime && !worldObj.isRemote) {
+      if(currentTime >= maxTime && !getWorld().isRemote) {
         // add the result to slot 1 and remove the original from slot 0
         setInventorySlotContents(1, TinkerRegistry.getDryingResult(getStackInSlot(0)));
         setInventorySlotContents(0, null);
         //drying time updated in setInventorySlotContents
 
         // comparator update
-        this.worldObj.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
+        this.getWorld().notifyNeighborsOfStateChange(this.pos, this.getBlockType());
       }
     }
   }
@@ -63,9 +66,9 @@ public class TileDryingRack extends TileItemRack implements ITickable, ISidedInv
     if(slot == 0) {
       updateDryingTime();
     }
-    else if(this.worldObj != null) {
+    else if(this.getWorld() != null) {
       // comparator update
-      this.worldObj.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
+      this.getWorld().notifyNeighborsOfStateChange(this.pos, this.getBlockType());
     }
   }
 
@@ -125,16 +128,17 @@ public class TileDryingRack extends TileItemRack implements ITickable, ISidedInv
 
   @Override
   public void readFromNBT(NBTTagCompound tags) {
-    currentTime = tags.getInteger("Time");
-    maxTime = tags.getInteger("MaxTime");
     super.readFromNBT(tags);
+    currentTime = tags.getInteger(TAG_TIME);
+    maxTime = tags.getInteger(TAG_MAXTIME);
   }
 
   @Nonnull
   @Override
   public NBTTagCompound writeToNBT(NBTTagCompound tags) {
-    tags.setInteger("Time", currentTime);
-    tags.setInteger("MaxTime", maxTime);
-    return super.writeToNBT(tags);
+    tags = super.writeToNBT(tags);
+    tags.setInteger(TAG_TIME, currentTime);
+    tags.setInteger(TAG_MAXTIME, maxTime);
+    return tags;
   }
 }
